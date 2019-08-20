@@ -1,0 +1,132 @@
+---
+title: "BUDS Training: Transformations Lab"
+subtitle: "Solutions"
+output:
+  pdf_document:
+    fig_height: 2
+    fig_width: 5
+    number_sections: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align="center")
+suppressMessages(library(tidyverse))
+```
+
+You have now spent some time learning about transformations of random variables. In this lab, we will programatically show relationships between distributions that can also be proved mathematically. To get you started, the following code compares the histogram of a randomly generated (simulated) sample dataset to the probability mass function or the probability density function that was used to generate the data. Notice that the red line generally follows the top of the histogram. The histograms here represent frequencys instead of counts. 
+
+```{r} 
+# An example PMF
+sample_df <- tibble(X = rpois(500,5))
+pmf_df <- tibble(X = seq(0, 20, 1), 
+                 pmf = dpois(X, 5))
+ggplot(sample_df, aes(x=X)) + 
+  geom_histogram(aes(y=stat(density)), binwidth = 1) +
+  geom_step(data = pmf_df, aes(x=X-0.5, y=pmf), col="red")+
+  theme_classic() +
+  labs(x="x", y="PMF", title = "An Example Discrete Distribution")
+
+# An example PDF
+sample_df <- tibble(X = rgamma(500, 2, 1))
+pdf_df <- tibble(X = seq(0, 10, .2), 
+                 pdf = dgamma(X, 2, 1))
+ggplot(sample_df, aes(x=X)) + 
+  geom_histogram(aes(y=stat(density)), binwidth = .5) +
+  geom_line(data = pdf_df, aes(x=X, y=pdf), col="red")+
+  theme_classic() +
+  labs(x="x", y="PDF", title = "An Example Continuous Distribution")
+
+
+```
+
+## Problem 1
+
+Recall if $N \sim \text{ Poisson}(\lambda)$ and $X | N \sim \ \text{Binomial}(N,p)$ then $X \sim \text{ Poisson}(\lambda p)$. Pick a $\lambda$ and $p$ and generate $X$ by first generating an $N$ and then $X | N$. Plot a histogram of $X$ versus the $\text{Poisson}(\lambda p)$ distribution. 
+        
+```{r} 
+N = rpois(1,lambda = 5)
+binom_cond <- tibble(X = seq(0,20,1), 
+                 pmf = dbinom(X, N, prob=0.6))
+#binom_df <- tibble(X = seq(0,20,1), 
+                   #pmf = binom_cond['pmf']/dpois(N,lambda=5))
+
+pmf_df <- tibble(X = seq(0, 20, 1), 
+                 pmf = dpois(X, 5*0.6))
+ggplot(pmf_df) + 
+  geom_step(aes(x=X-0.5, y=pmf), col="red")+
+  geom_step(data=binom_cond,aes(x=X-0.5, y=pmf), col="blue")+
+  theme_classic() +
+  labs(x="x", y="PMF", title = "An Example Discrete Distribution")
+
+
+```
+## Problem 2
+Show via a plot that $Z \sim \text{ Normal}(0, 1) \implies Z^2 \sim \chi^2_1$. 
+Note: $\chi^2_1$ is the Chi-squared distribution with 1 degree of freedom. 
+
+```{r}
+norm_df <- tibble(rnorm(1000))
+chisq_df2 <- tibble(X = rnorm(1000)^2, 
+                 pmf = dchisq(X, df=1))
+chisq_df <- tibble(X = seq(0, 5, 1/100), 
+                 pmf = dchisq(X, df=1))
+ggplot(chisq_df) + 
+  #geom_histogram(aes(y=statdensity(pmf),binwidth = 100) +
+  geom_step(aes(x=X, y=pmf), col="red")+
+  geom_step(data = chisq_df2,aes(x=X, y=pmf), col="blue")+
+  theme_classic() +
+  xlim(0, 5)+ ylim(0, 1.25)+
+  labs(x="x", y="PMF", title = "An Example Discrete Distribution")
+```
+
+## Problem 3
+\emph{Sum of $\chi^2$}: If $U_1, \dots, U_n$ are independent chi-square random variables with degrees of freedom $d_i$ respectively, then the distribution of  $V = U_1 + \dots + U_n$ is $\chi^2_{d}$ where $d = \sum_{i = 1}^n d_i$. Show this using 3 chi-square random variables and a plot. 
+
+```{r}
+sample1 <- rchisq(1000, df=1)
+sample2 <- rchisq(1000, df=2)
+sample3 <- rchisq(1000, df=3)
+sample = sample1 + sample2 + sample3
+chisq_df3 <- tibble(X = sample, 
+                 pmf = dchisq(X, df=6))
+chisq_df4 <- tibble(X = seq(0, 15, 1/100), 
+                 pmf = dchisq(X, df=6))
+
+ggplot(chisq_df3) + 
+  #geom_histogram(aes(y=statdensity(pmf),binwidth = 100) +
+  geom_step(aes(x=X, y=pmf), col="red")+
+  geom_step(data = chisq_df4,aes(x=X, y=pmf), col="blue")+
+  theme_classic() +
+  xlim(0, 15)+ 
+  ylim(0, 0.5) +
+  labs(x="x", y="PMF", title = "An Example Discrete Distribution")
+```
+    
+## Problem 4
+
+\emph{T distribution}: Show via a plot that if $Z \sim N(0, 1)$ and $U \sim \chi^2_n$ and $Z \perp U$ then the distribution of $$\frac{Z}{\sqrt{U / n}}$$ is a t-distribution with $n$ degrees of freedom. 
+
+```{r}
+n=3
+Z = rnorm(1000)
+U = rchisq(1000,df=n)
+var = Z/sqrt(U/n)
+t_dist <- tibble(X = var, 
+                 pmf = dt(X, df=n))
+t_dist2 <- tibble(X = seq(-10,10,1/100), 
+                 pmf = dt(X, df=n))
+ggplot(t_dist) + 
+  #geom_histogram(aes(y=statdensity(pmf),binwidth = 100) +
+  geom_step(aes(x=X, y=pmf), col="red")+
+  geom_step(data = t_dist2,aes(x=X, y=pmf), col="blue")+
+  theme_classic() +
+  xlim(-10,10)
+  labs(x="x", y="PMF", title = "An Example Discrete Distribution")
+```
+
+## Problem 5 
+
+\emph{F distribution} Show via a plot that if $U \perp V$ are independent chi-square random variables with $m$ and $n$ degrees of freedom, respectively, then the distribution of $$W = \frac{U / m}{V / n}$$ is the $F$ distribution with $m$ and $n$ degrees of freedom denoted $F_{m, n}$.
+
+```{r}
+```
