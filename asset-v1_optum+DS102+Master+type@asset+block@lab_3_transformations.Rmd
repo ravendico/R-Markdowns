@@ -46,10 +46,9 @@ Recall if $N \sim \text{ Poisson}(\lambda)$ and $X | N \sim \ \text{Binomial}(N,
 ```{r} 
 N = rpois(1,lambda = 5)
 binom_cond <- tibble(X = seq(0,20,1), 
-                 pmf = dbinom(X, N, prob=0.6))
+                 pmf = dbinom(X, size = N, prob=0.6))
 #binom_df <- tibble(X = seq(0,20,1), 
                    #pmf = binom_cond['pmf']/dpois(N,lambda=5))
-
 pmf_df <- tibble(X = seq(0, 20, 1), 
                  pmf = dpois(X, 5*0.6))
 ggplot(pmf_df) + 
@@ -65,14 +64,14 @@ Show via a plot that $Z \sim \text{ Normal}(0, 1) \implies Z^2 \sim \chi^2_1$.
 Note: $\chi^2_1$ is the Chi-squared distribution with 1 degree of freedom. 
 
 ```{r}
+
 norm_df <- tibble(rnorm(1000))
 chisq_df2 <- tibble(X = rnorm(1000)^2, 
                  pmf = dchisq(X, df=1))
-chisq_df <- tibble(X = seq(0, 5, 1/100), 
-                 pmf = dchisq(X, df=1))
-ggplot(chisq_df) + 
-  #geom_histogram(aes(y=statdensity(pmf),binwidth = 100) +
-  geom_step(aes(x=X, y=pmf), col="red")+
+chisq_df <- tibble(X = rchisq(5000,df=1))
+ggplot(chisq_df, aes(x=X)) + 
+  geom_histogram(aes(y=stat(density)),binwidth = 1/10) +
+  #geom_step(aes(x=X, y=pmf), col="red")+
   geom_step(data = chisq_df2,aes(x=X, y=pmf), col="blue")+
   theme_classic() +
   xlim(0, 5)+ ylim(0, 1.25)+
@@ -83,22 +82,17 @@ ggplot(chisq_df) +
 \emph{Sum of $\chi^2$}: If $U_1, \dots, U_n$ are independent chi-square random variables with degrees of freedom $d_i$ respectively, then the distribution of  $V = U_1 + \dots + U_n$ is $\chi^2_{d}$ where $d = \sum_{i = 1}^n d_i$. Show this using 3 chi-square random variables and a plot. 
 
 ```{r}
-sample1 <- rchisq(1000, df=1)
-sample2 <- rchisq(1000, df=2)
-sample3 <- rchisq(1000, df=3)
-sample = sample1 + sample2 + sample3
-chisq_df3 <- tibble(X = sample, 
-                 pmf = dchisq(X, df=6))
-chisq_df4 <- tibble(X = seq(0, 15, 1/100), 
-                 pmf = dchisq(X, df=6))
 
-ggplot(chisq_df3) + 
-  #geom_histogram(aes(y=statdensity(pmf),binwidth = 100) +
-  geom_step(aes(x=X, y=pmf), col="red")+
-  geom_step(data = chisq_df4,aes(x=X, y=pmf), col="blue")+
+chisq_df_sum <- tibble(X = rchisq(1000, df=1) + rchisq(1000, df=2) + rchisq(1000, df=3), 
+                 pmf = dchisq(X, df=6))
+chisq_df <- tibble(X = rchisq(5000,df=6))
+
+ggplot(chisq_df, aes(x=X)) + 
+  geom_histogram(aes(y=stat(density)),binwidth = 1/10) +
+  geom_step(data = chisq_df_sum,aes(x=X, y=pmf), col="blue")+
   theme_classic() +
   xlim(0, 15)+ 
-  ylim(0, 0.5) +
+  ylim(0, 0.2) +
   labs(x="x", y="PMF", title = "An Example Discrete Distribution")
 ```
     
@@ -111,16 +105,14 @@ n=3
 Z = rnorm(1000)
 U = rchisq(1000,df=n)
 var = Z/sqrt(U/n)
-t_dist <- tibble(X = var, 
+t_dist_func <- tibble(X = var, 
                  pmf = dt(X, df=n))
-t_dist2 <- tibble(X = seq(-10,10,1/100), 
-                 pmf = dt(X, df=n))
-ggplot(t_dist) + 
-  #geom_histogram(aes(y=statdensity(pmf),binwidth = 100) +
-  geom_step(aes(x=X, y=pmf), col="red")+
-  geom_step(data = t_dist2,aes(x=X, y=pmf), col="blue")+
+t_dist <- tibble(X = rt(5000, df=n))
+ggplot(t_dist, aes(x=X)) + 
+  geom_histogram(aes(y=stat(density)),binwidth = 1/10) +
+  geom_step(data = t_dist_func,aes(x=X, y=pmf), col="blue")+
   theme_classic() +
-  xlim(-10,10)
+  xlim(-10,10) + 
   labs(x="x", y="PMF", title = "An Example Discrete Distribution")
 ```
 
@@ -129,4 +121,19 @@ ggplot(t_dist) +
 \emph{F distribution} Show via a plot that if $U \perp V$ are independent chi-square random variables with $m$ and $n$ degrees of freedom, respectively, then the distribution of $$W = \frac{U / m}{V / n}$$ is the $F$ distribution with $m$ and $n$ degrees of freedom denoted $F_{m, n}$.
 
 ```{r}
+m = 3
+n = 5
+U = rchisq(1000,df=m)
+V = rchisq(1000,df=n)
+var = (U/m)/(V/n)
+f_dist_func <- tibble(X = var, 
+                 pmf = df(X, df1=m, df2=n))
+f_dist <- tibble(X = rf(5000, df1=m, df2=n))
+ggplot(f_dist, aes(x=X)) + 
+  geom_histogram(aes(y=stat(density)),binwidth = 1/10) +
+  geom_step(data = f_dist_func,aes(x=X, y=pmf), col="blue")+
+  theme_classic() +
+  
+  labs(x="x", y="PMF", title = "An Example Discrete Distribution")
+
 ```
