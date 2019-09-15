@@ -44,19 +44,22 @@ ggplot(sample_df, aes(x=X)) +
 Recall if $N \sim \text{ Poisson}(\lambda)$ and $X | N \sim \ \text{Binomial}(N,p)$ then $X \sim \text{ Poisson}(\lambda p)$. Pick a $\lambda$ and $p$ and generate $X$ by first generating an $N$ and then $X | N$. Plot a histogram of $X$ versus the $\text{Poisson}(\lambda p)$ distribution. 
         
 ```{r} 
-lmbd = 5
-prob = 0.6
-N = rpois(1,lambda = lambda) #random generation of N 
-binom_cond <- tibble(X = seq(0,N,1), 
-                 pmf = dbinom(X, size = N, prob= prob))
-#binom_df <- tibble(X = seq(0,20,1), 
-                   #pmf = binom_cond['pmf']/dpois(N,lambda=5))
-poisson_df <- tibble(X = rpois(1000,lambda=lmbd*prob))
-ggplot(poisson_df, aes(x=X)) + 
-  geom_histogram(aes(y=stat(density)), col="red")+
-  geom_step(data=binom_cond,aes(x=X-0.5, y=pmf), col="blue")+
+
+lamda=1
+p=0.7
+poss=rpois(500,lamda)
+sample_df <- tibble(X = poss,
+                    N= rbinom(poss,1,p),
+                    XN= X*N)
+pmf_df <- tibble(X = seq(0, 10, 1), 
+                 pmf = dpois(X, lamda*p))
+ggplot(sample_df, aes(x=XN)) + 
+  geom_histogram(aes(y=stat(density), color='actual'),fill='pink',binwidth = 1) +
+  geom_step(data = pmf_df, aes(x=X-0.5, y=pmf, color='X'))+
   theme_classic() +
-  labs(x="x", y="PMF", title = "An Example Discrete Distribution")
+  labs(x="x", y="PMF", title = "Distribution of Poisson and X") +
+  scale_colour_manual(name="Data sample",
+    values=c(actual="red", X="blue"))
 
 
 ```
