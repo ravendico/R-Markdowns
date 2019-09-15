@@ -1,0 +1,235 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={BUDS Training: Error rates, coverage rates, and power Lab},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{BUDS Training: Error rates, coverage rates, and power Lab}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \subtitle{Raven Ico}
+  \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+
+\begin{document}
+\maketitle
+
+\section{Problem 1}\label{problem-1}
+
+Each time we make a statistical decision, say based on a confidence
+interval or p-value, we are making a decision in the face of
+uncertainty, and therefore there is an associated risk of making an
+incorrect decision. In hypothesis testing we refer to two types of
+errors: type I errors, when we reject a true \(H_0\); and type II
+errors, when we fail to reject a false \(H_0\). The type I error rate
+can be controlled directly by the construction of our test - in
+particular, our \(\alpha\) significance level tells us the maximum
+\(P(\mbox{Type I Error})\). The likelihood of a type II error depends on
+several things: the sample size, the significance level, the variability
+in the data, and the true effect size.
+
+\subsection{Part (a)}\label{part-a}
+
+Suppose we observe Shaq shoot 20 freethrows, and we want to use our
+sample to decide if he shoots freethrows with better than 50\% accuracy.
+Let \(p\) be his true freethrow percentage, and consider a test that
+rejects \(H_0: p \leq 0.5\) when he make \(c\) or more shots out of 20.
+\(c/20\) is the critical value for this hypothesis test (i.e.~will
+reject the null hypothesis if the sample freethrow percentage is greater
+than or equal to \(c/20\)).
+
+Suppose his freethrow percentage is exactly 50\% (so rejecting \(H_0\)
+is an error). Make a plot of \(P(\mbox{Type I Error})\) versus \(c\),
+for \(c=0,1,\ldots,20\). Which value of \(c\) will give us a test with a
+type I error rate closest to but not greater than \(0.05\)?
+
+(hint: notice that \(P(\mbox{Type I Error}) = P(X \geq c)\), where
+\(X\sim binomial(20,0.5)\). Be careful to include the \(Pr(X=c)\) in
+your calculations).
+
+\subsection{Part (b)}\label{part-b}
+
+Assume now, we don't know the true value of Shaq's free throw
+percentage. Use your value of \(c\) from the previous problem and
+calculate the value of a type II error, \(Pr(X < c)\), for all values of
+freethrow percentage (\(p = X/20\)) where it is possible to make a type
+II error (it's not possible to make this error when \(H_0: p \le 0.5\)
+is true). Create a plot of type II error vs.~Shaq's true FT\%,
+
+\section{Problem 2}\label{problem-2}
+
+\subsection{Part (a)}\label{part-a-1}
+
+We would like to conduct a clinical trial to compare the mean levels of
+expression of a specific protein in patients given drug A versus
+patients given drug B. The null hypothesis is that the expression levels
+for drug B are less than or equal to those of drug A. Assuming the
+protein expression levels in each of the groups is approximately
+normally distributed with a pooled standard deviation of 1. The effect
+size is the true difference in means between the two groups. Plot the
+power of a t-test with significance level 0.05 by the effect size for
+sizes \(\{0.05, .1, .15, ... 0.95, 1\}\). Plot different curves for
+sample sizes \(n = 50, 100, 150, 200\).
+
+\subsection{Part (b)}\label{part-b-1}
+
+For each sample size, what effect size can you detect with a power of
+0.8? Explain this result in words.
+
+\section{Problem 3}\label{problem-3}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2019}\NormalTok{)}
+\NormalTok{n <-}\StringTok{ }\DecValTok{9} \CommentTok{# Sample size}
+\NormalTok{alpha <-}\StringTok{ }\DecValTok{1} \CommentTok{# Shape parameter  }
+\NormalTok{beta <-}\StringTok{ }\DecValTok{10} \CommentTok{# Scale parameter}
+
+\NormalTok{x <-}\StringTok{ }\KeywordTok{rgamma}\NormalTok{(n, alpha, beta) }\CommentTok{#A random sample to play with}
+\NormalTok{ci <-}\StringTok{ }\KeywordTok{t.test}\NormalTok{(x)}\OperatorTok{$}\NormalTok{conf.int[}\DecValTok{1}\OperatorTok{:}\DecValTok{2}\NormalTok{] }\CommentTok{#Get the confidence interval bounds}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Part (a)}\label{part-a-2}
+
+The above piece of code simulates a sample from a gamma distribution and
+calcultes the confidence interval for the mean. Simulate 100 random
+samples and store the confidence interval and mean for each sample,
+arrange the dataframe by the value of the means.
+
+\subsection{Part (b)}\label{part-b-2}
+
+Create a plot of the 100 simulated confidence intervals with the true
+mean indicated by a line on the graph.
+
+\subsection{Part (c)}\label{part-c}
+
+Report the percentage of confidence intervals that successfully capture
+the true expected value (the coverage rate), and conversely, the
+percentage of confidence intervals that don't contain the true value
+(the error rate).
+
+\subsection{Part (d)}\label{part-d}
+
+Is the error rate close to what it should be?
+
+\subsection{Part (e)}\label{part-e}
+
+Now run the simulation 1,000 times. Calculate the coverage rate and
+error rate and comment. Can you think of any reasons these intervals
+might have a higher error rate than they should?
+
+
+\end{document}

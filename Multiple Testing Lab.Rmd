@@ -1,0 +1,42 @@
+---
+title: "Multiple Testing Lab"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Use the following code to simulate a matric of categorical predictors $X \in \{0,1\}^{200\times100}$. Each column of $X$ represents a predictor and each row of $X$ indicates an observation. The code also simulates a response variable $Y$. 
+
+```{r}
+set.seed(2019)
+# Simulate predictor matrix
+X <- matrix(rbinom(10000, 1, .5), 200, 100)
+# Simluate response vector
+Y <- rnorm(200, mean = 2*X[,4]+5*X[,32]-.6*X[,90], sd = 1)
+```
+
+## Problem 1
+
+What is the "true" effect of each of the predictors on $Y$ (we know this because we simulated the data)?
+
+
+## Problem 2
+Write a for loop that conducts a hypothesis test comparing whether the mean of the values of $Y$ when the $i$th column of $X$ is $0$ are different than the mean of the values of $Y$ when the $i$th column of $X$ is $1$ for each of the simulated predictors. Store the p-values. How many p-values are less than 0.05?
+
+```{r}
+```
+
+## Problem 3
+Use an appropriate method to control the familywise error rate. How many corrected p-values are less than 0.05? Using 0.05 as the cutoff how many false positives are there? How many true positives?
+
+```{r}
+```
+
+## Problem 4
+Use an appropriate method to control the false discovery rate. How many corrected p-values are less than 0.05? Using 0.05 as the cutoff how many false positives are there? How many true positives?
+
+```{r}
+```
+
