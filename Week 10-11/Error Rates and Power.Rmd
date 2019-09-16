@@ -3,8 +3,8 @@ title: 'BUDS Training: Error rates, coverage rates, and power Lab'
 subtitle: 'Raven Ico'
 output:
   pdf_document:
-    fig_height: 2
-    fig_width: 5
+    fig_height: 4
+    fig_width: 8
     number_sections: false
 ---
 
@@ -13,6 +13,7 @@ output:
 # Center figures
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 suppressMessages(library(tidyverse))
+library(viridis)
 ```
 # Problem 1
 
@@ -28,28 +29,32 @@ Suppose his freethrow percentage is exactly 50\% (so rejecting $H_0$ is an error
 
 ```{r}
 c = seq(20)
-typeIerror = 1-pbinom(c,20,0.5)
+typeIerror = pbinom(c-1,20,0.5,lower.tail = FALSE)
 shaq = tibble(c,typeIerror)
 ggplot(shaq,aes(c,typeIerror))+
   geom_point()+
   geom_hline(yintercept = 0.05,color="blue")+
-  labs(x = "No. of successful freethrows", y="Type I error",title="c=14 gives type I error closest but not greater than 0.05")
+  labs(x = "No. of successful freethrows (c)", y="Type I error",
+       title="c=15 gives type I error closest but not greater than 0.05")+ 
+  annotate(
+    geom = "curve", x = 5, y = 0.275, xend = 2.5, yend = 0.1, 
+    curvature = .3, arrow = arrow(length = unit(2, "mm")), color="green"
+  ) +
+  annotate(geom = "text", x = 5.1, y = 0.28, label = "y=0.05", hjust = "left")
 ```
-
-
 
 ## Part (b)
 
 Assume now, we don't know the true value of Shaq's free throw percentage. Use your value of $c$ from the previous problem and calculate the value of a type II error, $Pr(X < c)$, for all values of freethrow percentage ($p = X/20$) where it is possible to make a type II error (it's not possible to make this error when $H_0: p \le 0.5$ is true).  Create a plot of type II error vs. Shaq's true FT\%, 
 
 ```{r}
-c = seq(20)
-typeIIerror = pbinom(c-1,20,0.5)
-shaq = tibble(c,typeIIerror)
-ggplot(shaq,aes(c/20,typeIIerror))+
+c = seq(11,20)
+tibble(FT=c/20,typeIIerror=pbinom(14,20,c/20))%>%
+ggplot(aes(FT,typeIIerror))+
   geom_point()+
-  geom_hline(yintercept = 0.05,color="blue")+
-  labs(x = "Free throw percentage", y="Type II error")
+  labs(x = "True FT %", y="Type II error",
+       title= "Plot of Shaq's True Free Throw Percentage (FT%>0.5) and  \n probability of Type II error")+
+  coord_cartesian(xlim=c(0.5,1.05))
 ```
 
 
@@ -60,27 +65,30 @@ We would like to conduct a clinical trial to compare the mean levels of expressi
 
 ```{r}
 alpha = 0.05
-sizes = seq(0.05,1,by=0.05)
+sizes = seq(0.05,1,by=0.05) #effect sizes
 
-power50 = power.t.test(n=50,delta=sizes,sd=1,sig.level=alpha,type="two.sample",alternative="one.sided")$power
-power100 = power.t.test(n=100,delta=sizes,sd=1,sig.level=alpha,type="two.sample",alternative="one.sided")$power
-power150 = power.t.test(n=150,delta=sizes,sd=1,sig.level=alpha,type="two.sample",alternative="one.sided")$power
-power200 = power.t.test(n=200,delta=sizes,sd=1,sig.level=alpha,type="two.sample",alternative="one.sided")$power
+#creating different curves for sample sizes n= 50, 100, 150, 200
+power50 = power.t.test(n=50,delta=sizes,sd=1,sig.level=alpha,type="two.sample",
+                       alternative="one.sided")$power
+power100 = power.t.test(n=100,delta=sizes,sd=1,sig.level=alpha,type="two.sample",
+                        alternative="one.sided")$power
+power150 = power.t.test(n=150,delta=sizes,sd=1,sig.level=alpha,type="two.sample",
+                        alternative="one.sided")$power
+power200 = power.t.test(n=200,delta=sizes,sd=1,sig.level=alpha,type="two.sample",
+                        alternative="one.sided")$power
 
 tibble(sizes,power50,power100,power150,power200)%>%
   ggplot(aes(sizes,power50))+
-    geom_point(col = "blue",mapping=aes(colour="N50"))+
-    geom_point(mapping=aes(sizes,power100,colour="N100"),col="green")+
-    geom_point(mapping=aes(sizes,power150,colour="N150"),col="orange")+
-    geom_point(mapping=aes(sizes,power200,colour="N200"),col="red")+
-    geom_line(col = "blue")+
-    geom_line(mapping=aes(sizes,power100),col="green")+
-    geom_line(mapping=aes(sizes,power150),col="orange")+
-    geom_line(mapping=aes(sizes,power200),col="red")+
-    labs(x = "Effect sizes", y="Power", title = "Plot of the power of t test according to different effect sizes")+
-    geom_hline(yintercept = 0.8)+
-    scale_color_manual(values=c("N50"="blue","N100"="green","N150"="orange","N200"="red"))#+
-#    annotate("text",x=0.25,y=0.8,label="N=200")
+    geom_point(mapping=aes(colour="N=50"))+
+    geom_point(mapping=aes(sizes,power100,colour="N=100"))+
+    geom_point(mapping=aes(sizes,power150,colour="N=150"))+
+    geom_point(mapping=aes(sizes,power200,colour="N=200"))+
+    geom_line(mapping=aes(colour="N=50"),alpha=0.2)+
+    geom_line(mapping=aes(sizes,power100,colour="N=100"),alpha=0.2)+
+    geom_line(mapping=aes(sizes,power150,colour="N=150"),alpha=0.2)+
+    geom_line(mapping=aes(sizes,power200,colour="N=200"),alpha=0.2)+
+  labs(x = "Effect sizes", y="Power", title = "Plot of the power of t test vs. different effect sizes \naccording to sample sizes N")+
+    geom_hline(mapping=aes(colour="y=0.8",yintercept = 0.8))
 
 
 ```
@@ -88,9 +96,7 @@ tibble(sizes,power50,power100,power150,power200)%>%
 ## Part (b)
 For each sample size, what effect size can you detect with a power of 0.8? Explain this result in words. 
 
-```{r}
-From the plot above, a power of 0.8 can detect an effect size of 0.25 for N=200, about 0.2625 for N=150, 0.27 for N=100, and 0.50 for N=50. Recall that effect size is the difference in the current mean vs. the actual mean. Thus, the effect size that can be detected increases as the number of samples decreases. 
-```
+**From the plot above, a power of 0.8 can detect an effect size of 0.25 for N=200, about 0.2625 for N=150, 0.27 for N=100, and 0.50 for N=50. Recall that effect size is the difference in the current mean vs. the actual mean. Thus, the effect size that can be detected increases as the number of samples decreases. **
 
 
 # Problem 3
@@ -112,27 +118,72 @@ Create a plot of the 100 simulated confidence intervals with the true mean indic
 
 ## Part (c)
 Report the percentage of confidence intervals that successfully capture the true expected value (the coverage rate), and conversely, the percentage of confidence intervals that don't contain the true value (the error rate). 
+```{r}
+set.seed(2019)
+reps = 100 #No. of repetitions
+n <- 9 # Sample size
+
+alpha <- 1 # Shape parameter  
+beta <- 10 # Scale parameter
+
+#empty matrices to store the confidence interval and mean
+confint = matrix(0,nrow=reps,ncol=2)
+mean = matrix(0,nrow=reps,ncol=1)
+
+#For loop to compute the confidence interval and true mean for each simulated sample, repeated 1000 times
+for(i in seq(reps)){
+  x <- rgamma(n, alpha, beta) #A random sample to play with
+  confint[i,] <- t.test(x)$conf.int[1:2] #Get the confidence interval bounds
+  mean[i] <- mean(x)
+}
+
+simul = tibble(means=mean[,1],lower_int=confint[,1],upper_int=confint[,2])%>%
+  arrange(desc(means))
+head(simul)
+
+ggplot(simul, aes(x = 1:reps, y = rep(alpha/beta,reps), color="True Mean")) +
+  geom_line(size = 1) +
+  geom_errorbar(aes(ymax = upper_int, ymin = lower_int,color="Confidence interval"))+
+  labs(x="Simulation No.", y="Mean Value", title="Plot of the 100 simulated confidence intervals for the mean \nof Gamma(1,10)")
+
+perc_with <- sum(apply(matrix(1:reps,ncol=1),1,function(x) between(alpha/beta,simul$lower_int[x],simul$upper_int[x])))/reps
+perc_without <- 1-perc_with
+tibble(coverage_rate=perc_with, error_rate=perc_without)
+```
 
 ## Part (d) 
 Is the error rate close to what it should be?
+
+**The error rate is 0.09 which is slightly close to the expected value of 0.05. **
 
 ## Part (e)
 Now run the simulation 1,000 times. Calculate the coverage rate and error rate and comment. Can you think of any reasons these intervals might have a higher error rate than they should? 
 
 ```{r}
 set.seed(2019)
-reps = 100
+reps = 1000 #No. of repetitions
 n <- 9 # Sample size
+
 alpha <- 1 # Shape parameter  
 beta <- 10 # Scale parameter
+
+#empty matrices to store the confidence interval and mean
 confint = matrix(0,nrow=reps,ncol=2)
 mean = matrix(0,nrow=reps,ncol=1)
+
+#For loop to compute the confidence interval and true mean for each simulated sample, repeated 1000 times
 for(i in seq(reps)){
   x <- rgamma(n, alpha, beta) #A random sample to play with
   confint[i,] <- t.test(x)$conf.int[1:2] #Get the confidence interval bounds
-  mean <- t.test(x)$estimate
+  mean[i] <- mean(x)
 }
-tibble(mean,confint)
+
+simul = tibble(means=mean[,1],lower_int=confint[,1],upper_int=confint[,2])%>%
+  arrange(desc(means))
+
+perc_with <- sum(apply(matrix(1:reps,ncol=1),1,function(x) between(alpha/beta,simul$lower_int[x],simul$upper_int[x])))/reps
+perc_without <- 1-perc_with
+tibble(coverage_rate=perc_with, error_rate=perc_without)
 
 ```
 

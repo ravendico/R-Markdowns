@@ -1,10 +1,13 @@
 ---
 title: "Bootstrap Homework Assignment"
+subtitle: "Raven Ico"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+suppressMessages(library(tidyverse))
+
 ```
 
 # Example (Boos \& Stefanski Ex. 11.3)
@@ -88,10 +91,8 @@ for(i in 1:B)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
   this_rats = sample(x = rats, size = length(rats), replace = TRUE)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-  # Step 2: calculate the statistic and store the results
+  # Step 2: calculate the statistic (inter-quartile range) and store the results
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-  # In this step our estimator is the median, but we can do a more 
-  # complicated procedure than just using the median function
   boot_IQR[i] = IQR(this_rats)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
   # Step 3: Repeat B times
@@ -99,12 +100,12 @@ for(i in 1:B)
 }
 
 # plot the results
-hist(boot_IQR)
+hist(boot_IQR, col="#CC79A7",main="Histogram of the simulated inter-quartile range (IQR) of rats data", xlab="IQR")
 
 #**********************************************************************#
 # Calculate a 95% confidence interval from the vector of statistics
 #**********************************************************************#
-quantile(boot_medians, probs = c(0.025, 0.975))
+tibble("Lower CI(2.5th quantile)"= quantile(boot_medians, probs = 0.025),"Lower CI(97.5th quantile)"= quantile(boot_medians, probs = 0.975))
 ```
 
 
@@ -132,10 +133,8 @@ for(i in 1:B)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
   this_rats = sample(x = rats, size = length(rats), replace = TRUE)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-  # Step 2: calculate the statistic and store the results
+  # Step 2: calculate the statistic (standard deviation) and store the results
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-  # In this step our estimator is the median, but we can do a more 
-  # complicated procedure than just using the median function
   boot_sd[i] = sd(this_rats)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
   # Step 3: Repeat B times
@@ -143,12 +142,12 @@ for(i in 1:B)
 }
 
 # plot the results
-hist(boot_sd)
+hist(boot_sd,col = "#E69F00",main="Histogram of the simulated standard deviation of the rats data",xlab="Standard Deviation")
 
 #**********************************************************************#
-# Calculate a 95% confidence interval from the vector of statistics
+# Calculate a 90% confidence interval from the vector of statistics
 #**********************************************************************#
-quantile(boot_sd, probs = c(0.05, 0.95))
+tibble("Lower CI(5th quantile)"= quantile(boot_sd, probs = 0.05),"Lower CI(95th quantile)"= quantile(boot_sd, probs = 0.95))
 ```
 
 # Problem 3
@@ -182,10 +181,8 @@ for(i in 1:B)
   resample_x1 = sample(x = x1, size = n1, replace = TRUE)
   resample_x2 = sample(x = x2, size = n2, replace = TRUE)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-  # Step 2: calculate the statistic and store the results
+  # Step 2: calculate the statistic(difference in median) and store the results
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-  # In this step our estimator is the median, but we can do a more 
-  # complicated procedure than just using the median function
   boot_median_diff[i] = median(resample_x1) - median(resample_x2)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
   # Step 3: Repeat B times
@@ -193,12 +190,12 @@ for(i in 1:B)
 }
 
 # plot the results
-hist(boot_median_diff)
+hist(boot_median_diff,col="#56B4E9",main="Histogram of the simulated difference in median of x1 and x2", xlab="Difference in median of x1 and x2")
 
 #**********************************************************************#
 # Calculate a 95% confidence interval from the vector of statistics
 #**********************************************************************#
-quantile(boot_median_diff, probs = c(0.025, 0.975))
+tibble("Lower CI(2.5th quantile)"= quantile(boot_median_diff, probs = 0.025),"Lower CI(97.5th quantile)"= quantile(boot_median_diff, probs = 0.975))
 ```
 
 # Problem 4
@@ -240,20 +237,25 @@ for(i in 1:B)
 }
 
 # plot the results
-hist(boot_lambda)
+hist(boot_lambda, col="#009E73", main="Histogram of the simulated value of lambda for x", xlab="Lambda")
 
 #**********************************************************************#
 # Calculate a 95% confidence interval from the vector of statistics
 #**********************************************************************#
-quantile(boot_lambda, probs = c(0.025, 0.975))
+tibble("Lower CI(2.5th quantile)"= quantile(boot_lambda, probs = 0.025),"Lower CI(97.5th quantile)"= quantile(boot_lambda, probs = 0.975))
 
 ```
 
 Compare this result with the CI calculated using aymptotic MLE theory
 ```{r}
-lower <- mean(x) - 2*sqrt(var(x)/n) #Theoretical lower and upper bounds for a 95% CI
+n=length(x)
 
+lower <- mean(x) - 2*sqrt(var(x)/n) #Theoretical lower and upper bounds for a 95% CI
 upper <- mean(x) + 2*sqrt(var(x)/n)
-lower
-upper
+
+tibble("Lower CI(Asymptotic MLE Theory)"= mean(x) - 2*sqrt(var(x)/n),
+       "Upper CI(Asymptotic MLE Theory)"= mean(x) + 2*sqrt(var(x)/n))
+
+
 ```
+**The obtained confidence intervals using the asymptotic MLE theory and bootstrap method are fairly close with one another.**

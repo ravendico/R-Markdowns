@@ -45,15 +45,13 @@ Recall if $N \sim \text{ Poisson}(\lambda)$ and $X | N \sim \ \text{Binomial}(N,
         
 ```{r} 
 
-lamda=1
+lamda=5
 p=0.7
 poss=rpois(500,lamda)
-sample_df <- tibble(X = poss,
-                    N= rbinom(poss,1,p),
-                    XN= X*N)
+sample_df <- tibble(X = rbinom(500,poss,p))
 pmf_df <- tibble(X = seq(0, 10, 1), 
                  pmf = dpois(X, lamda*p))
-ggplot(sample_df, aes(x=XN)) + 
+ggplot(sample_df, aes(x=X)) + 
   geom_histogram(aes(y=stat(density), color='actual'),fill='pink',binwidth = 1) +
   geom_step(data = pmf_df, aes(x=X-0.5, y=pmf, color='X'))+
   theme_classic() +
