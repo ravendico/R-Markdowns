@@ -1,0 +1,152 @@
+---
+title: "R Notes"
+author: "Raven Ico"
+date: "September 21, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(UsingR)
+data(galton)
+library(reshape2)
+long <- melt(galton)
+ggplot(long,aes(x=value, fill=variable)) +
+  geom_histogram(colour = "black", binwidth = 1) + facet_grid(.~variable)
+```
+---
+## Experiment
+### Use R studio's manipulate to see what value of $\mu$ minimizes the sum of the squared deviations.
+
+```{r}
+library(manipulate)
+myHist <- function(mu){
+    mse <- mean((galton$child - mu)^2)
+    g <- ggplot(galton, aes(x = child)) + geom_histogram(fill = "salmon", colour = "black", binwidth=1)
+    g <- g + geom_vline(xintercept = mu, size = 3)
+    g <- g + ggtitle(paste("mu = ", mu, ", MSE = ", round(mse, 2), sep = ""))
+    g
+}
+manipulate(myHist(mu), mu = slider(62, 74, step = 0.5))
+```
+Size of point represents number of points at that (X, Y) combination (See the Rmd file for the code).
+```{r}
+library(dplyr)
+freqData <- as.data.frame(table(galton$child, galton$parent))
+names(freqData) <- c("child", "parent", "freq")
+freqData$child <- as.numeric(as.character(freqData$child))
+freqData$parent <- as.numeric(as.character(freqData$parent))
+g <- ggplot(filter(freqData, freq > 0), aes(x = parent, y = child))
+g <- g  + scale_size(range = c(2, 20), guide = "none" )
+g <- g + geom_point(colour="grey50", aes(size = freq+20, show_guide = FALSE))
+g <- g + geom_point(aes(colour=freq, size = freq))
+g <- g + scale_colour_gradient(low = "lightblue", high="white")                    
+g
+```
+Regression through the origin
+```{r}
+y <- galton$child - mean(galton$child)
+x <- galton$parent - mean(galton$parent)
+freqData <- as.data.frame(table(x, y))
+names(freqData) <- c("child", "parent", "freq")
+freqData$child <- as.numeric(as.character(freqData$child))
+freqData$parent <- as.numeric(as.character(freqData$parent))
+myPlot <- function(beta){
+    g <- ggplot(filter(freqData, freq > 0), aes(x = parent, y = child))
+    g <- g  + scale_size(range = c(2, 20), guide = "none" )
+    g <- g + geom_point(colour="grey50", aes(size = freq+20, show_guide = FALSE))
+    g <- g + geom_point(aes(colour=freq, size = freq))
+    g <- g + scale_colour_gradient(low = "lightblue", high="white")                     
+    g <- g + geom_abline(intercept = 0, slope = beta, size = 3)
+    mse <- mean( (y - beta * x) ^2 )
+    g <- g + ggtitle(paste("beta = ", beta, "mse = ", round(mse, 3)))
+    g
+}
+manipulate(myPlot(beta), beta = slider(0.6, 1.2, step = 0.02))
+```
+Solution
+```{r}
+lm(I(child - mean(child))~ I(parent - mean(parent)) - 1, data = galton)
+```
+
+---
+```{r, fig.height=6,fig.width=7,echo=FALSE}
+freqData <- as.data.frame(table(galton$child, galton$parent))
+names(freqData) <- c("child", "parent", "freq")
+freqData$child <- as.numeric(as.character(freqData$child))
+freqData$parent <- as.numeric(as.character(freqData$parent))
+g <- ggplot(filter(freqData, freq > 0), aes(x = parent, y = child))
+g <- g  + scale_size(range = c(2, 20), guide = "none" )
+g <- g + geom_point(colour="grey50", aes(size = freq+20, show_guide = FALSE))
+g <- g + geom_point(aes(colour=freq, size = freq))
+g <- g + scale_colour_gradient(low = "lightblue", high="white")                    
+lm1 <- lm(galton$child ~ galton$parent)
+g <- g + geom_abline(intercept = coef(lm1)[1], slope = coef(lm1)[2], size = 3, colour = grey(.5))
+g
+```
+Statistical Linear Regression
+```{r}
+library(UsingR)
+data(diamond)
+library(ggplot2)
+g = ggplot(diamond, aes(x = carat, y = price))
+g = g + xlab("Mass (carats)")
+g = g + ylab("Price (SIN $)")
+g = g + geom_point(size = 7, colour = "black", alpha=0.5)
+g = g + geom_point(size = 5, colour = "blue", alpha=0.2)
+g = g + geom_smooth(method = "lm", colour = "black")
+g
+```
+Fitting the linear regression model
+```{r}
+#price is the response, carat is the predictor
+fit <- lm(price ~ carat, data = diamond)
+coef(fit)
+#summary(fit)
+```
+Getting a more interpretable intercept
+```{r}
+fit2 <- lm(price ~ I(carat - mean(carat)), data = diamond)
+coef(fit2)
+#the slope is the same, 500.1 is the expected size of the average sized diamond
+```
+Changing scale
+* A one carat increase in a diamond is pretty big, what about
+  changing units to 1/10th of a carat? 
+* We can just do this by just dividing the coeficient by 10.
+  * We expect  a `r round(coef(fit)[2], 2) / 10` (SIN) dollar   change in price for every 1/10th of a carat increase in mass of diamond.
+* Showing that it's the same if we rescale the Xs and refit
+```{r}
+fit3 <- lm(price ~ I(carat * 10), data = diamond)
+coef(fit3)
+```
+Predicting the price of the diamond
+```{r, echo = TRUE}
+newx <- c(0.16, 0.27, 0.34)
+coef(fit)[1] + coef(fit)[2] * newx
+predict(fit, newdata = data.frame(carat = newx))
+```
+Predicted values at the observed Xs (red)
+and at the new Xs (lines)
+```{r}
+data(diamond)
+plot(diamond$carat, diamond$price,  
+     xlab = "Mass (carats)", 
+     ylab = "Price (SIN $)", 
+     bg = "lightblue", 
+     col = "black", cex = 1.1, pch = 21,frame = FALSE)
+abline(fit, lwd = 2)
+points(diamond$carat, predict(fit), pch = 19, col = "red")
+lines(c(0.16, 0.16, 0.12), 
+      c(200, coef(fit)[1] + coef(fit)[2] * 0.16,
+      coef(fit)[1] + coef(fit)[2] * 0.16))
+lines(c(0.27, 0.27, 0.12), 
+      c(200, coef(fit)[1] + coef(fit)[2] * 0.27,
+        coef(fit)[1] + coef(fit)[2] * 0.27))
+lines(c(0.34, 0.34, 0.12), 
+      c(200, coef(fit)[1] + coef(fit)[2] * 0.34,
+        coef(fit)[1] + coef(fit)[2] * 0.34))
+text(newx, rep(250, 3), labels = newx, pos = 2)
+```
