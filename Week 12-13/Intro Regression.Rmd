@@ -8,6 +8,7 @@ output:
     extra_dependencies: ["xcolor"]
 header-includes:
   - \usepackage{setspace}\onehalfspacing
+  - \usepackage{enumerate}
 fontsize: 11pt
 ---
 
@@ -26,13 +27,19 @@ library(tidyverse)
 ## Problem 1
 Use `GGpairs` in the `GGally` package to produce a scatterplot matrix which includes all of the variables in the data set and the pairwise corrlations. Set `progress = FALSE` so only the plot is printed. You will need to exclude the \color{blue} `name` \color{black} variable, which is qualitative. Make sure to set the size to make it legible. You can change the font size by adding `theme(text=element_text(size=8))` to the plot. 
 
-```{r}
+```{r, fig.height = 8, fig.width = 8, echo=FALSE}
+data(Auto)
+#head(Auto)
+Auto_dataset = subset(Auto,select=-c(name))
+ggpairs(Auto_dataset,progress = FALSE)+ theme(text=element_text(size=8))
 ```
 
 ## Problem 2
 Perform a multiple linear regression with \color{blue} `mpg` \color{black} as the response and all other variables except \color{blue} `name` \color{black} as the predictors. Print the results (including $R^2$ and p-values). 
 
 ```{r}
+fit = lm(mpg~., data = Auto_dataset)
+summary(fit)
 ```
 
 
@@ -44,16 +51,26 @@ Is there a relationship between the predictors and the response?
 Which predictors appear to have statistically significant relationship to the response?
 What does the coefficient for the \color{blue} `year` \color{black} variable suggest?
 
-\textit{Answer:}. 
-      
+\textit{Answer:} 
+\begin{itemize}
+\item About 82.15\% (value of R-squared) of the variance of the response variable is explained by the model.
+\item There is statistically significant linear relationship between the predictor variables namely \textit{displacement}, \textit{weight}, \textit{year}, and \textit{origin} and the response variable \textit{mpg}
+\item A positive correlation coefficient indicates that as the predictor variable increase by one unit, then the amount of increase of response variable is equivalent to the correlation coefficient. For example, since the coefficient for \textit{year} is 0.75, then a one year increase in the model year of the car increases its miles per gallon (mpg) by 0.75.   
+\end{itemize}
+
 ## Problem 4       
 Use the \color{blue} `plot()` \color{black} function to produce diagnostic plots of the linear regression fit. Make sure your plots are visible in your pdf. Comment on any problems you see with the fit. Do the residual plots suggest any unusually large outliers? Does the leverage plot identify any observations with unusually high leverage?
 
-```{r}
+```{r, fig.height = 6, fig.width = 8, echo=FALSE}
+par(mfrow=c(2,2))
+plot(fit)
 ```
 
 \textit{Answer: } 
+For the first plot and third plot, these are diagnostic plots in determining if the residuals have non-linear patterns and consequently, if there is non-linear relationship between the predictor and response variable. Thus, suggesting heteroskedasticity if the points have some pattern and not equally spread. Based from the first plot, there seems to be a slightly parabolic pattern in the residuals and the residuals tend to be more scattered as the fitted values increases.
 
+Next, for the QQ plot, this is used in determining if the residuals have a normal distribution. It seems to follow a straight line except for the few right end data points.
 
+Finally, the residuals vs. leverage plot can be used in determining outliers which have high leverage and influence in the resulting regression line. There are no points within the red dotted lines in the upper right corner which is suggestive that there are no outliers in the dataset.
 
 

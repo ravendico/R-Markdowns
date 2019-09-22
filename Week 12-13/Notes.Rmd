@@ -8,19 +8,19 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## Experiment
+### Use R studio's manipulate to see what value of $\mu$ minimizes the sum of the squared deviations.
+
 ```{r}
+library(ggplot2)
 library(UsingR)
 data(galton)
 library(reshape2)
 long <- melt(galton)
 ggplot(long,aes(x=value, fill=variable)) +
   geom_histogram(colour = "black", binwidth = 1) + facet_grid(.~variable)
-```
----
-## Experiment
-### Use R studio's manipulate to see what value of $\mu$ minimizes the sum of the squared deviations.
 
-```{r}
 library(manipulate)
 myHist <- function(mu){
     mse <- mean((galton$child - mu)^2)
@@ -88,7 +88,6 @@ g
 ```
 Statistical Linear Regression
 ```{r}
-library(UsingR)
 data(diamond)
 library(ggplot2)
 g = ggplot(diamond, aes(x = carat, y = price))
@@ -149,4 +148,568 @@ lines(c(0.34, 0.34, 0.12),
       c(200, coef(fit)[1] + coef(fit)[2] * 0.34,
         coef(fit)[1] + coef(fit)[2] * 0.34))
 text(newx, rep(250, 3), labels = newx, pos = 2)
+```
+**Residual Variation**
+Using diamonds data
+```{r, echo = FALSE, fig.height=6,fig.width=6}
+data(diamond)
+library(ggplot2)
+g = ggplot(diamond, aes(x = carat, y = price))
+g = g + xlab("Mass (carats)")
+g = g + ylab("Price (SIN $)")
+g = g + geom_smooth(method = "lm", colour = "black")
+g = g + geom_point(size = 7, colour = "black", alpha=0.5)
+g = g + geom_point(size = 5, colour = "blue", alpha=0.2)
+g
+```
+## Residuals
+* Model $Y_i = \beta_0 + \beta_1 X_i + \epsilon_i$ where $\epsilon_i \sim N(0, \sigma^2)$.
+* Observed outcome $i$ is $Y_i$ at predictor value $X_i$
+* Predicted outcome $i$ is $\hat Y_i$ at predictor valuve $X_i$ is
+  $$
+  \hat Y_i = \hat \beta_0 + \hat \beta_1 X_i
+  $$
+* Residual, the between the observed and predicted outcome
+  $$
+  e_i = Y_i - \hat Y_i
+  $$
+  * The vertical distance between the observed data point and the regression line
+* Least squares minimizes $\sum_{i=1}^n e_i^2$
+* The $e_i$ can be thought of as estimates of the $\epsilon_i$.
+
+## Properties of the residuals
+* $E[e_i] = 0$.
+* If an intercept is included, $\sum_{i=1}^n e_i = 0$
+* If a regressor variable, $X_i$, is included in the model $\sum_{i=1}^n e_i X_i = 0$. 
+* Residuals are useful for investigating poor model fit.
+* Positive residuals are above the line, negative residuals are below.
+* Residuals can be thought of as the outcome ($Y$) with the
+  linear association of the predictor ($X$) removed.
+* One differentiates residual variation (variation after removing
+the predictor) from systematic variation (variation explained by the regression model).
+* Residual plots highlight poor model fit.
+```{r}
+data(diamond)
+y <- diamond$price; x <- diamond$carat; n <- length(y)
+fit <- lm(y ~ x)
+e <- resid(fit)
+yhat <- predict(fit)
+max(abs(e -(y - yhat))) #another way
+max(abs(e - (y - coef(fit)[1] - coef(fit)[2] * x))) #another way
+```
+To show that sum is zero
+```{r}
+sum(e)
+sum(e*x)
+```
+Residuals versus x
+```{r}
+plot(diamond$carat, diamond$price,  
+     xlab = "Mass (carats)", 
+     ylab = "Price (SIN $)", 
+     bg = "lightblue", 
+     col = "black", cex = 2, pch = 21,frame = FALSE)
+abline(fit, lwd = 2)
+for (i in 1 : n) 
+  lines(c(x[i], x[i]), c(y[i], yhat[i]), col = "red" , lwd = 2)
+```
+Another type of plot
+```{r}
+plot(x, e,  
+     xlab = "Mass (carats)", 
+     ylab = "Residuals (SIN $)", 
+     bg = "lightblue", 
+     col = "black", cex = 2, pch = 21,frame = FALSE)
+abline(h = 0, lwd = 2)
+for (i in 1 : n) 
+  lines(c(x[i], x[i]), c(e[i], 0), col = "red" , lwd = 2)
+
+#residuals should be patternless
+```
+Nonlinear data
+```{r}
+x = runif(100, -3, 3); y = x + sin(x) + rnorm(100, sd = .2); 
+library(ggplot2)
+g = ggplot(data.frame(x = x, y = y), aes(x = x, y = y))
+g = g + geom_smooth(method = "lm", colour = "black")
+g = g + geom_point(size = 2, colour = "black", alpha = 0.4)
+g = g + geom_point(size = 1, colour = "red", alpha = 0.4)
+g
+```
+Residual plot
+```{r, echo = FALSE, fig.height=5, fig.width=5}
+g = ggplot(data.frame(x = x, y = resid(lm(y ~ x))), 
+           aes(x = x, y = y))
+g = g + geom_hline(yintercept = 0, size = 2); 
+g = g + geom_point(size = 7, colour = "black", alpha = 0.4)
+g = g + geom_point(size = 5, colour = "red", alpha = 0.4)
+g = g + xlab("X") + ylab("Residual")
+g
+#residual plots highlight model inaccuracy
+```
+Heteroskedasticity
+```{r}
+x <- runif(100, 0, 6); y <- x + rnorm(100,  mean = 0, sd = .001 * x);
+#standard deviation of the errors have the x variables, and hats how heteroskedasticity is generated
+g = ggplot(data.frame(x = x, y = y), aes(x = x, y = y))
+g = g + geom_smooth(method = "lm", colour = "black")
+g = g + geom_point(size = 7, colour = "black", alpha = 0.4)
+g = g + geom_point(size = 5, colour = "red", alpha = 0.4)
+g
+```
+Getting rid of the blank space above and below
+```{r, echo = FALSE, fig.height=4.5, fig.width=4.5}
+g = ggplot(data.frame(x = x, y = resid(lm(y ~ x))), 
+           aes(x = x, y = y))
+g = g + geom_hline(yintercept = 0, size = 2); 
+g = g + geom_point(size = 7, colour = "black", alpha = 0.4)
+g = g + geom_point(size = 5, colour = "red", alpha = 0.4)
+g = g + xlab("X") + ylab("Residual")
+g
+#greater variability as the x variables increase, this is called heteroskedasticity
+```
+Diamond data residual plot
+```{r}
+#two residual vector
+#first is just the intercept, deviatin around the average price
+#second is adding carat as predictor variable, variation around the regression line as carat as the predictor variable
+e = c(resid(lm(price ~ 1, data = diamond)),
+      resid(lm(price ~ carat, data = diamond)))
+fit = factor(c(rep("Itc", nrow(diamond)),
+               rep("Itc, slope", nrow(diamond))))
+g = ggplot(data.frame(e = e, fit = fit), aes(y = e, x = fit, fill = fit))
+g = g + geom_dotplot(binaxis = "y", size = 2, stackdir = "center", binwidth = 20)
+g = g + xlab("Fitting approach")
+g = g + ylab("Residual price")
+g
+```
+Estimating residual variation
+```{r}
+y <- diamond$price; x <- diamond$carat; n <- length(y)
+fit <- lm(y ~ x)
+summary(fit)$sigma
+sqrt(sum(resid(fit)^2) / (n - 2)) #formula
+```
+Example, anscombe data
+```{r}
+require(stats); require(graphics); data(anscombe)
+ff <- y ~ x
+mods <- setNames(as.list(1:4), paste0("lm", 1:4))
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  ## or   ff[[2]] <- as.name(paste0("y", i))
+  ##      ff[[3]] <- as.name(paste0("x", i))
+  mods[[i]] <- lmi <- lm(ff, data = anscombe)}
+  #print(anova(lmi))
+  
+op <- par(mfrow = c(2, 2), mar = 0.1+c(4,4,1,1), oma =  c(0, 0, 2, 0))
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  plot(ff, data = anscombe, col = "red", pch = 21, bg = "orange", cex = 1.2,
+       xlim = c(3, 19), ylim = c(3, 13))
+  abline(mods[[i]], col = "blue")
+}
+mtext("Anscombe's 4 Regression data sets", outer = TRUE, cex = 1.5)
+par(op)
+```
+### Inference in Regression
+Using diamonds data
+```{r}
+data(diamond)
+y <- diamond$price; x <- diamond$carat; n <- length(y)
+beta1 <- cor(y, x) * sd(y) / sd(x)
+beta0 <- mean(y) - beta1 * mean(x)
+e <- y - beta0 - beta1 * x
+sigma <- sqrt(sum(e^2) / (n-2)) 
+ssx <- sum((x - mean(x))^2)
+seBeta0 <- (1 / n + mean(x) ^ 2 / ssx) ^ .5 * sigma 
+seBeta1 <- sigma / sqrt(ssx)
+tBeta0 <- beta0 / seBeta0; tBeta1 <- beta1 / seBeta1
+pBeta0 <- 2 * pt(abs(tBeta0), df = n - 2, lower.tail = FALSE)
+pBeta1 <- 2 * pt(abs(tBeta1), df = n - 2, lower.tail = FALSE)
+coefTable <- rbind(c(beta0, seBeta0, tBeta0, pBeta0), c(beta1, seBeta1, tBeta1, pBeta1))
+colnames(coefTable) <- c("Estimate", "Std. Error", "t value", "P(>|t|)")
+rownames(coefTable) <- c("(Intercept)", "x")
+coefTable
+```
+EASY WAY
+```{r}
+fit <- lm(y ~ x); 
+summary(fit)$coefficients
+```
+Getting confidence interval
+```{r}
+sumCoef <- summary(fit)$coefficients
+sumCoef[1,1] + c(-1, 1) * qt(.975, df = fit$df) * sumCoef[1, 2]
+(sumCoef[2,1] + c(-1, 1) * qt(.975, df = fit$df) * sumCoef[2, 2]) / 10
+```
+With 95% confidence, we estimate that a 0.1 carat increase in
+diamond size results in a `r round((sumCoef[2,1] - qt(.975, df = fit$df) * sumCoef[2, 2]) / 10, 1)` to `r round((sumCoef[2,1] + qt(.975, df = fit$df) * sumCoef[2, 2]) / 10, 1)` increase in price in (Singapore) dollars.
+
+### Prediction of Outcomes
+Plotting the prediction intervals
+```{r}
+library(ggplot2)
+newx = data.frame(x = seq(min(x), max(x), length = 100))
+p1 = data.frame(predict(fit, newdata= newx,interval = ("confidence")))
+p2 = data.frame(predict(fit, newdata = newx,interval = ("prediction")))
+p1$interval = "confidence"
+p2$interval = "prediction"
+p1$x = newx$x
+p2$x = newx$x
+dat = rbind(p1, p2)
+names(dat)[1] = "y"
+g = ggplot(dat, aes(x = x, y = y))
+g = g + geom_ribbon(aes(ymin = lwr, ymax = upr, fill = interval), alpha = 0.2) 
+g = g + geom_line()
+g = g + geom_point(data = data.frame(x = x, y=y), aes(x = x, y = y), size = 4)
+g
+```
+### Multivariable Regression
+Demonstration
+```{r}
+n = 100; x = rnorm(n); x2 = rnorm(n); x3 = rnorm(n)
+y = 1 + x + x2 + x3 + rnorm(n, sd = .1)
+ey = resid(lm(y ~ x2 + x3))
+ex = resid(lm(x ~ x2 + x3))
+sum(ey * ex) / sum(ex ^ 2)
+coef(lm(ey ~ ex - 1))
+coef(lm(y ~ x + x2 + x3)) #look at x
+```
+## Adjustment Examples
+
+Example #1
+```{r}
+n <- 100; t <- rep(c(0, 1), c(n/2, n/2)); x <- c(runif(n/2), runif(n/2));
+beta0 <- 0; beta1 <- 2; tau <- 1; sigma <- .2
+y <- beta0 + x * beta1 + t * tau + rnorm(n, sd = sigma)
+plot(x, y, type = "n", frame = FALSE)
+abline(lm(y ~ x), lwd = 2)
+abline(h = mean(y[1 : (n/2)]), lwd = 3)
+abline(h = mean(y[(n/2 + 1) : n]), lwd = 3)
+fit <- lm(y ~ x + t)
+abline(coef(fit)[1], coef(fit)[2], lwd = 3)
+abline(coef(fit)[1] + coef(fit)[3], coef(fit)[2], lwd = 3)
+points(x[1 : (n/2)], y[1 : (n/2)], pch = 21, col = "black", bg = "lightblue", cex = 2)
+points(x[(n/2 + 1) : n], y[(n/2 + 1) : n], pch = 21, col = "black", bg = "salmon", cex = 2)
+
+```
+## Discussion
+### Some things to note in this simulation
+* The X variable is unrelated to group status
+* The X variable is related to Y, but the intercept depends
+  on group status.
+* The group variable is related to Y.
+  * The relationship between group status and Y is constant depending on X.
+  * The relationship between group and Y disregarding X is about the same as holding X constant
+
+\beta_1*T represent the changes in the intercepts between the groups
+\beta_2*X would be the common slope that exists between the two groups
+
+pretty much the same
+a lot of direct comparison possible
+
+##Simulation #2
+```{r}
+n <- 100; t <- rep(c(0, 1), c(n/2, n/2)); x <- c(runif(n/2), 1.5 + runif(n/2));
+beta0 <- 0; beta1 <- 2; tau <- 0; sigma <- .2
+y <- beta0 + x * beta1 + t * tau + rnorm(n, sd = sigma)
+plot(x, y, type = "n", frame = FALSE)
+abline(lm(y ~ x), lwd = 2)
+abline(h = mean(y[1 : (n/2)]), lwd = 3)
+abline(h = mean(y[(n/2 + 1) : n]), lwd = 3)
+fit <- lm(y ~ x + t)
+abline(coef(fit)[1], coef(fit)[2], lwd = 3)
+abline(coef(fit)[1] + coef(fit)[3], coef(fit)[2], lwd = 3)
+points(x[1 : (n/2)], y[1 : (n/2)], pch = 21, col = "black", bg = "lightblue", cex = 2)
+points(x[(n/2 + 1) : n], y[(n/2 + 1) : n], pch = 21, col = "black", bg = "salmon", cex = 2)
+
+```
+
+
+## Discussion
+### Some things to note in this simulation
+* The X variable is highly related to group status
+* The X variable is related to Y, the intercept
+  doesn't depend on the group variable.
+  * The X variable remains related to Y holding group status constant
+* The group variable is marginally related to Y disregarding X.
+* The model would estimate no adjusted effect due to group.
+  * There isn't any data to inform the relationship between
+    group and Y.
+  * This conclusion is entirely based on the model.
+  
+  
+## Simulation #3
+```{r}
+n <- 100; t <- rep(c(0, 1), c(n/2, n/2)); x <- c(runif(n/2), .9 + runif(n/2));
+beta0 <- 0; beta1 <- 2; tau <- -1; sigma <- .2
+y <- beta0 + x * beta1 + t * tau + rnorm(n, sd = sigma)
+plot(x, y, type = "n", frame = FALSE)
+abline(lm(y ~ x), lwd = 2)
+abline(h = mean(y[1 : (n/2)]), lwd = 3)
+abline(h = mean(y[(n/2 + 1) : n]), lwd = 3)
+fit <- lm(y ~ x + t)
+abline(coef(fit)[1], coef(fit)[2], lwd = 3)
+abline(coef(fit)[1] + coef(fit)[3], coef(fit)[2], lwd = 3)
+points(x[1 : (n/2)], y[1 : (n/2)], pch = 21, col = "black", bg = "lightblue", cex = 2)
+points(x[(n/2 + 1) : n], y[(n/2 + 1) : n], pch = 21, col = "black", bg = "salmon", cex = 2)
+
+```
+## Discussion
+### Some things to note in this simulation
+* Marginal association has red group higher than blue.
+* Adjusted relationship has blue group higher than red.
+* Group status related to X.
+* There is some direct evidence for comparing red and blue
+holding X fixed.
+
+Often called as simpsons paradox - things can change to the exact opposite when you done adjustment
+## Simulation 4
+```{r}
+n <- 100; t <- rep(c(0, 1), c(n/2, n/2)); x <- c(.5 + runif(n/2), runif(n/2));
+beta0 <- 0; beta1 <- 2; tau <- 1; sigma <- .2
+y <- beta0 + x * beta1 + t * tau + rnorm(n, sd = sigma)
+plot(x, y, type = "n", frame = FALSE)
+abline(lm(y ~ x), lwd = 2)
+abline(h = mean(y[1 : (n/2)]), lwd = 3)
+abline(h = mean(y[(n/2 + 1) : n]), lwd = 3)
+fit <- lm(y ~ x + t)
+abline(coef(fit)[1], coef(fit)[2], lwd = 3)
+abline(coef(fit)[1] + coef(fit)[3], coef(fit)[2], lwd = 3)
+points(x[1 : (n/2)], y[1 : (n/2)], pch = 21, col = "black", bg = "lightblue", cex = 2)
+points(x[(n/2 + 1) : n], y[(n/2 + 1) : n], pch = 21, col = "black", bg = "salmon", cex = 2)
+```
+
+
+---
+## Discussion
+### Some things to note in this simulation
+* No marginal association between group status and Y.
+* Strong adjusted relationship.
+* Group status not related to X.
+* There is lots of direct evidence for comparing red and blue
+holding X fixed.
+
+---
+## Simulation 5
+```{r, fig.height=5, fig.width=5, echo = FALSE, results='hide'}
+n <- 100; t <- rep(c(0, 1), c(n/2, n/2)); x <- c(runif(n/2, -1, 1), runif(n/2, -1, 1));
+beta0 <- 0; beta1 <- 2; tau <- 0; tau1 <- -4; sigma <- .2
+y <- beta0 + x * beta1 + t * tau + t * x * tau1 + rnorm(n, sd = sigma)
+plot(x, y, type = "n", frame = FALSE)
+abline(lm(y ~ x), lwd = 2)
+abline(h = mean(y[1 : (n/2)]), lwd = 3)
+abline(h = mean(y[(n/2 + 1) : n]), lwd = 3)
+fit <- lm(y ~ x + t + I(x * t))
+abline(coef(fit)[1], coef(fit)[2], lwd = 3)
+abline(coef(fit)[1] + coef(fit)[3], coef(fit)[2] + coef(fit)[4], lwd = 3)
+points(x[1 : (n/2)], y[1 : (n/2)], pch = 21, col = "black", bg = "lightblue", cex = 2)
+points(x[(n/2 + 1) : n], y[(n/2 + 1) : n], pch = 21, col = "black", bg = "salmon", cex = 2)
+```
+
+---
+## Discussion
+### Some things to note from this simulation
+* There is no such thing as a group effect here.
+  * The impact of group reverses itself depending on X.
+  * Both intercept and slope depends on group.
+* Group status and X unrelated.
+  * There's lots of information about group effects holding X fixed.
+
+---
+### Simulation 6
+```{r, fig.height=5, fig.width=5, echo = FALSE, results='hide'}
+p <- 1
+n <- 100; x2 <- runif(n); x1 <- p * runif(n) - (1 - p) * x2
+beta0 <- 0; beta1 <- 1; tau <- 4 ; sigma <- .01
+y <- beta0 + x1 * beta1 + tau * x2 + rnorm(n, sd = sigma)
+plot(x1, y, type = "n", frame = FALSE)
+abline(lm(y ~ x1), lwd = 2)
+co.pal <- heat.colors(n)
+points(x1, y, pch = 21, col = "black", bg = co.pal[round((n - 1) * x2 + 1)], cex = 2)
+```
+
+---
+### Do this to investigate the bivariate relationship
+```
+library(rgl)
+plot3d(x1, x2, y)
+```
+
+---
+### Residual relationship
+```{r, fig.height=5, fig.width=5, echo = FALSE, results='hide'}
+plot(resid(lm(x1 ~ x2)), resid(lm(y ~ x2)), frame = FALSE, col = "black", bg = "lightblue", pch = 21, cex = 2)
+abline(lm(I(resid(lm(x1 ~ x2))) ~ I(resid(lm(y ~ x2)))), lwd = 2)
+```
+
+
+---
+## Discussion
+### Some things to note from this simulation
+
+* X1 unrelated to X2
+* X2 strongly related to Y
+* Adjusted relationship between X1 and Y largely unchanged
+  by considering X2.
+  * Almost no residual variability after accounting for X2.
+
+---
+## Some final thoughts
+* Modeling multivariate relationships is difficult.
+* Play around with simulations to see how the
+  inclusion or exclusion of another variable can
+  change analyses.
+* The results of these analyses deal with the
+impact of variables on associations.
+  * Ascertaining mechanisms or cause are difficult subjects
+    to be added on top of difficulty in understanding multivariate associations.
+
+### DSU
+```{r}
+#install.packages("faraway")
+library(faraway)
+data(teengamb)
+head(teengamb)
+```
+```{r}
+fit = lm(teengamb$gamble ~ teengamb$sex + teengamb$status +teengamb$income + teengamb$verbal)
+summary(fit)
+```
+# Diagnostics
+
+Swiss data
+```{r, fig.height = 5, fig.width = 5}
+data(swiss); par(mfrow = c(2, 2))
+fit <- lm(Fertility ~ . , data = swiss); plot(fit)
+```
+## Influence measures
+* Do `?influence.measures` to see the full suite of influence measures in stats. The measures include
+  * `rstandard` - standardized residuals, residuals divided by their standard deviations)
+  * `rstudent` - standardized residuals, residuals divided by their standard deviations, where the ith data point was deleted in the calculation of the standard deviation for the residual to follow a t distribution
+  * `hatvalues` - measures of leverage, can be used for data entry error
+  * `dffits` - change in the predicted response when the $i^{th}$ point is deleted in fitting the model.
+  * `dfbetas` - change in individual coefficients when the $i^{th}$ point is deleted in fitting the model.
+  * `cooks.distance` - overall change in teh coefficients when the $i^{th}$ point is deleted.
+  * `resid` - returns the ordinary residuals
+  * `resid(fit) / (1 - hatvalues(fit))` where `fit` is the linear model fit returns the PRESS residuals, i.e. the leave one out cross validation residuals - the difference in the response and the predicted response at data point $i$, where it was not included in the model fitting.
+```{r}
+?influence.measures
+```
+## How do I use all of these things?
+* Be wary of simplistic rules for diagnostic plots and measures. The use of these tools is context specific. It's better to understand what they are trying to accomplish and use them judiciously.
+* Not all of the measures have meaningful absolute scales. You can look at them relative to the values across the data.
+* They probe your data in different ways to diagnose different problems. 
+* Patterns in your residual plots generally indicate some poor aspect of model fit. These can include:
+  * Heteroskedasticity (non constant variance).
+  * Missing model terms.
+  * Temporal patterns (plot residuals versus collection order).
+* Residual QQ plots investigate normality of the errors.
+* Leverage measures (hat values) can be useful for diagnosing data entry errors.
+* Influence measures get to the bottom line, 'how does deleting or including this point impact a particular aspect of the model'.
+
+## Case 1
+```{r}
+
+n <- 100; x <- c(10, rnorm(n)); y <- c(10, c(rnorm(n)))
+plot(x, y, frame = FALSE, cex = 2, pch = 21, bg = "lightblue", col = "black")
+abline(lm(y ~ x)) 
+
+* The point `c(10, 10)` has created a strong regression relationship where there shouldn't be one.
+
+```
+## Showing a couple of the diagnostic values
+```{r}
+fit <- lm(y ~ x)
+round(dfbetas(fit)[1 : 10, 2], 3)
+round(hatvalues(fit)[1 : 10], 3)
+
+#first values is much bigger than the rest
+#hat values must be between 0 and 1
+```
+
+---
+## Case 2
+```{r, fig.height=5, fig.width=5, echo=FALSE}
+x <- rnorm(n); y <- x + rnorm(n, sd = .3)
+x <- c(5, x); y <- c(5, y)
+plot(x, y, frame = FALSE, cex = 2, pch = 21, bg = "lightblue", col = "black")
+fit2 <- lm(y ~ x)
+abline(fit2)            
+```
+point adheres very niely to the regression line
+---
+## Looking at some of the diagnostics
+```{r, echo = TRUE}
+round(dfbetas(fit2)[1 : 10, 2], 3) #first not distinctly large
+round(hatvalues(fit2)[1 : 10], 3) #first much larger bec the point is outside the range of the x values
+```
+
+---
+## Example described by Stefanski TAS 2007 Vol 61.
+```{r, fig.height=4, fig.width=4}
+## Don't everyone hit this server at once.  Read the paper first.
+dat <- read.table('http://www4.stat.ncsu.edu/~stefanski/NSF_Supported/Hidden_Images/orly_owl_files/orly_owl_Lin_4p_5_flat.txt', header = FALSE)
+pairs(dat)
+```
+
+---
+## Got our P-values, should we bother to do a residual plot?
+```{r}
+summary(lm(V1 ~ . -1, data = dat))$coef
+#every single p value is significant, is this fine?
+```
+
+---
+## Residual plot
+### P-values significant, O RLY?
+```{r, fig.height=4, fig.width=4, echo = TRUE}
+fit <- lm(V1 ~ . - 1, data = dat); plot(predict(fit), resid(fit), pch = '.')
+#residual plot should not have any patterns, 
+```
+
+---
+## Back to the Swiss data
+```{r, fig.height = 5, fig.width = 5, echo=FALSE}
+data(swiss); par(mfrow = c(2, 2))
+fit <- lm(Fertility ~ . , data = swiss); plot(fit)
+summary(fit)
+```
+#1
+No pattern in residuals
+Linear relationship
+#2 QQ Plot 
+For testing normality of error terms
+#3 Scale Location
+For comparability of residuals
+#4 Residuals vs Leverage
+
+### DSU
+```{r, fig.height = 5, fig.width = 5, echo=FALSE}
+data(airquality); par(mfrow = c(2, 2))
+fit <- lm(Ozone ~ . , data = airquality); plot(fit)
+summary(fit)
+```
+SAT dataset
+```{r, fig.height = 5, fig.width = 5, echo=FALSE}
+library(UsingR)
+data(SAT); par(mfrow = c(2, 2))
+fit <- lm(total ~ expend + salary + ratio , data = SAT); 
+plot(fit)
+summary(fit)
+```
+### Assessment
+```{r}
+#1
+B0 = 50
+B1 = 20 #GPA
+B2 = .07 #IQ
+B3 = 35 #Gender
+B4 = 0.01 #GPA and IQ
+B5 = -10 #GPA and Gender
+GPA = 4
+IQ = 110
+Gender = 1
+B0 + B1*GPA + B2*IQ + B3*Gender + B4*GPA*IQ + B5*GPA*Gender  
 ```
