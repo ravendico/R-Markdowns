@@ -1,0 +1,117 @@
+---
+title: '__Statistical Modeling Course__'
+subtitle: '__Logistic Regression Assignment__'
+output:
+  pdf_document:
+    fig_height: 3
+    fig_width: 4.5
+header-includes:
+  - \usepackage{setspace}\onehalfspacing
+fontsize: 11pt
+  - \usepackage{enumerate}
+---
+
+
+```{r, echo = FALSE, include = FALSE}
+library(tidyverse)
+library(ISLR)
+```
+
+We will use the `Default` data set in the `ISLR` package for this assignment. 
+
+# Problem 1 
+Fit a logistic regression model that uses  `student`, `income`  and  `balance`  to predict  `default` . Interpret the coefficients. 
+
+```{r}
+data("Default")
+head(Default)
+require(dplyr)
+model <- glm(default~student+income+balance,data=Default, family="binomial")
+summary(model)$coef
+exp(coef(model))
+```
+
+\textit{Answer: }
+The coefficients are as follows:
+\begin{itemize}
+\item (Intercept) -1.087e+01
+\item student     -6.468e-01
+\item income       3.033e-06
+\item balance      5.737e-03
+\end{itemize}
+However, using a p-value of 0.05, only the intercept, student, and balance predictor variables are statistically significant. The coefficients are much easier to interpret by using $e^{X^T\beta}$.The intercept is the odds of default when everyone of the predictor variables is 0. The student coefficient of -0.6468 indicates the odds of default decreases when the person is a student for fixed number of income and balance which is quite surprising. For income, the odds of default increases by 3.033e-06 as the income of a person increases by one unit given fixed student type and balance. Similarly, the odds of default increases by 5.737e-03 as the average balance that the customer has remaining on their credit card after making their monthly payment increases by one unit.
+
+# Problem 2
+Using the validation set approach, estimate the test error of this model. To do this, perform the following steps:
+
+- Write a function that takes 2 arguments: a formula and a dateset 
+- The function should do the following:
+  - Split the sample set intro a training set and a validation set.
+  - Fit a multiple logistic regression model using only the training observations.
+  - Obtain a prediction of default status for each individual in the validation set by computing the estimated probability of default for that individual, and classifying the individual to the `default`  category if the estimated probability is greater than 0.5.
+  - Compute the validation set error, which is the fraction of the observations in the validation set that are misclassified.
+- The function should return the validation error.
+  
+```{r}
+set.seed(2019)
+prob2 <- function(formula,dataset){
+  train_index = sample(c(TRUE,FALSE), nrow(dataset), replace=TRUE, prob=c(0.6,0.4))
+  train <- dataset[train_index,]
+  validation <- dataset[!train_index,]
+  model <- glm(formula, data=train, family="binomial")
+  predicted_probs = predict(model, validation, type="response")>0.5
+  predict <- rep("No",nrow(validation))
+  predict[predicted_probs>0.5] = "Yes"
+  return(mean(predict != validation$default))
+}
+```
+
+
+# Problem 3
+Use your function from Problem 2 to repeat the process ten times, using ten different splits of the observations into a training set and a validation set, then get the average of these test errors. Comment on the results obtained.
+
+```{r}
+set.seed(2020)
+errors = rep(0,10)
+for(i in 1:10){
+  errors[i]=prob2(formula=default ~ student + income + balance, Default)
+}
+mean(errors)
+```
+
+\textit{Answer:} 
+On average, the rate of misclassification for the Default dataset using the logistic regression model, is only 2.72% which is a fairly acceptable amount of error. 
+
+# Problem 4
+Using your choice of goodness of fit test, determine if the logistic regression model is reliable for inference. Compare the model's descriptive and explanatory power from its predictive accuracy in Problem 3.
+
+
+```{r}
+anova(model, test = "Chisq")
+```
+
+\textit{Answer:} 
+
+# Problem 5
+Add your predicted probabilites to the Default data frame and call the column `preds`. Use the following code to plot the ROC curve. Calculate the confusion matrix and AUC. Comment on the results results. 
+
+```{r, echo = TRUE, eval = FALSE}
+library(plotROC)
+Default <- 
+  Default %>%
+  mutate(preds = predict(model,Default, type="response"))%>%
+  mutate(default_num = as.numeric(default)-1)
+
+ggplot(Default, aes(d=default_num, m=preds)) + 
+  geom_roc(n.cuts = 6, labelround = 4) +
+  geom_abline(intercept = 0, slope = 1)
+
+#Computing the Area Under the Curve (AUC)
+library(ROCR)
+prediction(predict(model, Default, type="response"), Default$default) %>%
+  performance(measure = "auc") %>%
+  .@y.values
+```
+
+\textit{Answer: }
+From the graph presented above, it looks like the model discriminates well between customers who default and those who do not. After computing for the Area Under the Curve (AUC), a value of 0.9496 is obtained which indicates that the model is a good classifying model.
