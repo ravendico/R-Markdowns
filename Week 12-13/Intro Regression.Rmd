@@ -1,6 +1,6 @@
 ---
 title: '__Statistical Modeling Course__'
-subtitle: '__Multiple Linear Regression Assignment__'
+subtitle: '__Raven Ico - Multiple Linear Regression Assignment__'
 output:
   pdf_document:
     fig_height: 3
@@ -53,8 +53,8 @@ What does the coefficient for the \color{blue} `year` \color{black} variable sug
 
 \textit{Answer:} 
 \begin{itemize}
-\item About 82.15\% (value of R-squared) of the variance of the response variable is explained by the model.
-\item There is statistically significant linear relationship between the predictor variables namely \textit{displacement}, \textit{weight}, \textit{year}, and \textit{origin} and the response variable \textit{mpg}
+\item The predictor variables namely \textit{displacement}, \textit{weight}, \textit{year}, and \textit{origin} has statistically significant linear relationship with the response variable \textit{mpg}. The intercept is statistically significant as well.
+\item About 82.15\% (value of R-squared) of the variance of the response variable is explained by the linear model.
 \item A positive correlation coefficient indicates that as the predictor variable increase by one unit, then the amount of increase of response variable is equivalent to the correlation coefficient. For example, since the coefficient for \textit{year} is 0.75, then a one year increase in the model year of the car increases its miles per gallon (mpg) by 0.75.   
 \end{itemize}
 
@@ -71,6 +71,6 @@ For the first plot and third plot, these are diagnostic plots in determining if 
 
 Next, for the QQ plot, this is used in determining if the residuals have a normal distribution. It seems to follow a straight line except for the few right end data points.
 
-Finally, the residuals vs. leverage plot can be used in determining outliers which have high leverage and influence in the resulting regression line. There are no points within the red dotted lines in the upper right corner which is suggestive that there are no outliers in the dataset.
+Finally, the residuals vs. leverage plot can be used in determining outliers which have high leverage and influence in the resulting regression line. There are no points within the red dotted lines in the upper right corner which is suggestive that there are no outliers with high leverage in the dataset.
 
 

@@ -15,6 +15,10 @@ fontsize: 11pt
 ```{r, echo = FALSE, include = FALSE}
 library(tidyverse)
 library(ISLR)
+library(plotROC)
+library(ROCR)
+library(expss)
+
 ```
 
 We will use the `Default` data set in the `ISLR` package for this assignment. 
@@ -24,10 +28,8 @@ Fit a logistic regression model that uses  `student`, `income`  and  `balance`  
 
 ```{r}
 data("Default")
-head(Default)
-require(dplyr)
 model <- glm(default~student+income+balance,data=Default, family="binomial")
-summary(model)$coef
+summary(model)
 exp(coef(model))
 ```
 
@@ -39,7 +41,7 @@ The coefficients are as follows:
 \item income       3.033e-06
 \item balance      5.737e-03
 \end{itemize}
-However, using a p-value of 0.05, only the intercept, student, and balance predictor variables are statistically significant. The coefficients are much easier to interpret by using $e^{X^T\beta}$.The intercept is the odds of default when everyone of the predictor variables is 0. The student coefficient of -0.6468 indicates the odds of default decreases when the person is a student for fixed number of income and balance which is quite surprising. For income, the odds of default increases by 3.033e-06 as the income of a person increases by one unit given fixed student type and balance. Similarly, the odds of default increases by 5.737e-03 as the average balance that the customer has remaining on their credit card after making their monthly payment increases by one unit.
+However, using a p-value of 0.05, only the intercept, student, and balance predictor variables are statistically significant. The coefficients are much easier to interpret by using $e^{X^T\beta}$.The intercept is the odds of default when each one of the predictor variables is equal to 0. The student coefficient of -0.6468 indicates the odds of default decreases when the person is a student for fixed number of income and balance which is quite surprising. For income, the odds of default increases by 3.033e-06% as the income of a person increases by one unit given fixed student type and balance. Similarly, the odds of default increases by 5.737e-03% as the average balance that the customer has remaining on their credit card after making their monthly payment increases by one unit.
 
 # Problem 2
 Using the validation set approach, estimate the test error of this model. To do this, perform the following steps:
@@ -91,12 +93,12 @@ anova(model, test = "Chisq")
 ```
 
 \textit{Answer:} 
+Using an ANOVA test, the summary suggests that both the balance and student status are effective in prediting the probability of default of an individual.
 
 # Problem 5
 Add your predicted probabilites to the Default data frame and call the column `preds`. Use the following code to plot the ROC curve. Calculate the confusion matrix and AUC. Comment on the results results. 
 
 ```{r, echo = TRUE, eval = FALSE}
-library(plotROC)
 Default <- 
   Default %>%
   mutate(preds = predict(model,Default, type="response"))%>%
@@ -107,11 +109,17 @@ ggplot(Default, aes(d=default_num, m=preds)) +
   geom_abline(intercept = 0, slope = 1)
 
 #Computing the Area Under the Curve (AUC)
-library(ROCR)
 prediction(predict(model, Default, type="response"), Default$default) %>%
   performance(measure = "auc") %>%
   .@y.values
+
+
+Default <- Default %>%
+  mutate(default_pred = ifelse(preds<0.5,"No","Yes"))
+
+#Confusion Matrix
+table(Default$default,Default$default_pred)
 ```
 
 \textit{Answer: }
-From the graph presented above, it looks like the model discriminates well between customers who default and those who do not. After computing for the Area Under the Curve (AUC), a value of 0.9496 is obtained which indicates that the model is a good classifying model.
+From the graph presented above, it looks like the model discriminates well between customers who default and those who do not. After computing for the Area Under the Curve (AUC), a value of 0.9496 is obtained which indicates that the model is a good classifying model. From the confusion matrix, there are numerous misclassifications from the predicted model. False positives are 40 and false negatives are 228.

@@ -1,0 +1,355 @@
+\documentclass[11pt - \usepackage{enumerate},]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Statistical Modeling Course},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{\textbf{Statistical Modeling Course}}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \subtitle{\textbf{Logistic Regression Assignment}}
+  \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+\usepackage{setspace}\onehalfspacing
+
+\begin{document}
+\maketitle
+
+We will use the \texttt{Default} data set in the \texttt{ISLR} package
+for this assignment.
+
+\section{Problem 1}\label{problem-1}
+
+Fit a logistic regression model that uses \texttt{student},
+\texttt{income} and \texttt{balance} to predict \texttt{default} .
+Interpret the coefficients.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{data}\NormalTok{(}\StringTok{"Default"}\NormalTok{)}
+\NormalTok{model <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(default}\OperatorTok{~}\NormalTok{student}\OperatorTok{+}\NormalTok{income}\OperatorTok{+}\NormalTok{balance,}\DataTypeTok{data=}\NormalTok{Default, }\DataTypeTok{family=}\StringTok{"binomial"}\NormalTok{)}
+\KeywordTok{summary}\NormalTok{(model)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = default ~ student + income + balance, family = "binomial", 
+##     data = Default)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.4691  -0.1418  -0.0557  -0.0203   3.7383  
+## 
+## Coefficients:
+##               Estimate Std. Error z value Pr(>|z|)    
+## (Intercept) -1.087e+01  4.923e-01 -22.080  < 2e-16 ***
+## studentYes  -6.468e-01  2.363e-01  -2.738  0.00619 ** 
+## income       3.033e-06  8.203e-06   0.370  0.71152    
+## balance      5.737e-03  2.319e-04  24.738  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 2920.6  on 9999  degrees of freedom
+## Residual deviance: 1571.5  on 9996  degrees of freedom
+## AIC: 1579.5
+## 
+## Number of Fisher Scoring iterations: 8
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{exp}\NormalTok{(}\KeywordTok{coef}\NormalTok{(model))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  (Intercept)   studentYes       income      balance 
+## 1.903854e-05 5.237317e-01 1.000003e+00 1.005753e+00
+\end{verbatim}
+
+\textit{Answer: } The coefficients are as follows:
+
+\begin{itemize}
+\item (Intercept) -1.087e+01
+\item student     -6.468e-01
+\item income       3.033e-06
+\item balance      5.737e-03
+\end{itemize}
+
+However, using a p-value of 0.05, only the intercept, student, and
+balance predictor variables are statistically significant. The
+coefficients are much easier to interpret by using \(e^{X^T\beta}\).The
+intercept is the odds of default when each one of the predictor
+variables is equal to 0. The student coefficient of -0.6468 indicates
+the odds of default decreases when the person is a student for fixed
+number of income and balance which is quite surprising. For income, the
+odds of default increases by 3.033e-06\% as the income of a person
+increases by one unit given fixed student type and balance. Similarly,
+the odds of default increases by 5.737e-03\% as the average balance that
+the customer has remaining on their credit card after making their
+monthly payment increases by one unit.
+
+\section{Problem 2}\label{problem-2}
+
+Using the validation set approach, estimate the test error of this
+model. To do this, perform the following steps:
+
+\begin{itemize}
+\tightlist
+\item
+  Write a function that takes 2 arguments: a formula and a dateset
+\item
+  The function should do the following:
+\item
+  Split the sample set intro a training set and a validation set.
+\item
+  Fit a multiple logistic regression model using only the training
+  observations.
+\item
+  Obtain a prediction of default status for each individual in the
+  validation set by computing the estimated probability of default for
+  that individual, and classifying the individual to the
+  \texttt{default} category if the estimated probability is greater than
+  0.5.
+\item
+  Compute the validation set error, which is the fraction of the
+  observations in the validation set that are misclassified.
+\item
+  The function should return the validation error.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2019}\NormalTok{)}
+\NormalTok{prob2 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(formula,dataset)\{}
+\NormalTok{  train_index =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\OtherTok{TRUE}\NormalTok{,}\OtherTok{FALSE}\NormalTok{), }\KeywordTok{nrow}\NormalTok{(dataset), }\DataTypeTok{replace=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{prob=}\KeywordTok{c}\NormalTok{(}\FloatTok{0.6}\NormalTok{,}\FloatTok{0.4}\NormalTok{))}
+\NormalTok{  train <-}\StringTok{ }\NormalTok{dataset[train_index,]}
+\NormalTok{  validation <-}\StringTok{ }\NormalTok{dataset[}\OperatorTok{!}\NormalTok{train_index,]}
+\NormalTok{  model <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(formula, }\DataTypeTok{data=}\NormalTok{train, }\DataTypeTok{family=}\StringTok{"binomial"}\NormalTok{)}
+\NormalTok{  predicted_probs =}\StringTok{ }\KeywordTok{predict}\NormalTok{(model, validation, }\DataTypeTok{type=}\StringTok{"response"}\NormalTok{)}\OperatorTok{>}\FloatTok{0.5}
+\NormalTok{  predict <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\StringTok{"No"}\NormalTok{,}\KeywordTok{nrow}\NormalTok{(validation))}
+\NormalTok{  predict[predicted_probs}\OperatorTok{>}\FloatTok{0.5}\NormalTok{] =}\StringTok{ "Yes"}
+  \KeywordTok{return}\NormalTok{(}\KeywordTok{mean}\NormalTok{(predict }\OperatorTok{!=}\StringTok{ }\NormalTok{validation}\OperatorTok{$}\NormalTok{default))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Problem 3}\label{problem-3}
+
+Use your function from Problem 2 to repeat the process ten times, using
+ten different splits of the observations into a training set and a
+validation set, then get the average of these test errors. Comment on
+the results obtained.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2020}\NormalTok{)}
+\NormalTok{errors =}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{10}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{)\{}
+\NormalTok{  errors[i]=}\KeywordTok{prob2}\NormalTok{(}\DataTypeTok{formula=}\NormalTok{default }\OperatorTok{~}\StringTok{ }\NormalTok{student }\OperatorTok{+}\StringTok{ }\NormalTok{income }\OperatorTok{+}\StringTok{ }\NormalTok{balance, Default)}
+\NormalTok{\}}
+\KeywordTok{mean}\NormalTok{(errors)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.02715666
+\end{verbatim}
+
+\textit{Answer:} On average, the rate of misclassification for the
+Default dataset using the logistic regression model, is only 2.72\%
+which is a fairly acceptable amount of error.
+
+\section{Problem 4}\label{problem-4}
+
+Using your choice of goodness of fit test, determine if the logistic
+regression model is reliable for inference. Compare the model's
+descriptive and explanatory power from its predictive accuracy in
+Problem 3.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(model, }\DataTypeTok{test =} \StringTok{"Chisq"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Analysis of Deviance Table
+## 
+## Model: binomial, link: logit
+## 
+## Response: default
+## 
+## Terms added sequentially (first to last)
+## 
+## 
+##         Df Deviance Resid. Df Resid. Dev  Pr(>Chi)    
+## NULL                     9999     2920.7              
+## student  1    11.97      9998     2908.7 0.0005416 ***
+## income   1     1.19      9997     2907.5 0.2758849    
+## balance  1  1335.95      9996     1571.5 < 2.2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\textit{Answer:} Using an ANOVA test, the summary suggests that both the
+balance and student status are effective in prediting the probability of
+default of an individual.
+
+\section{Problem 5}\label{problem-5}
+
+Add your predicted probabilites to the Default data frame and call the
+column \texttt{preds}. Use the following code to plot the ROC curve.
+Calculate the confusion matrix and AUC. Comment on the results results.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Default <-}\StringTok{ }
+\StringTok{  }\NormalTok{Default }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{preds =} \KeywordTok{predict}\NormalTok{(model,Default, }\DataTypeTok{type=}\StringTok{"response"}\NormalTok{))}\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{default_num =} \KeywordTok{as.numeric}\NormalTok{(default)}\OperatorTok{-}\DecValTok{1}\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(Default, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{d=}\NormalTok{default_num, }\DataTypeTok{m=}\NormalTok{preds)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_roc}\NormalTok{(}\DataTypeTok{n.cuts =} \DecValTok{6}\NormalTok{, }\DataTypeTok{labelround =} \DecValTok{4}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_abline}\NormalTok{(}\DataTypeTok{intercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{slope =} \DecValTok{1}\NormalTok{)}
+
+\CommentTok{#Computing the Area Under the Curve (AUC)}
+\KeywordTok{prediction}\NormalTok{(}\KeywordTok{predict}\NormalTok{(model, Default, }\DataTypeTok{type=}\StringTok{"response"}\NormalTok{), Default}\OperatorTok{$}\NormalTok{default) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{performance}\NormalTok{(}\DataTypeTok{measure =} \StringTok{"auc"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\NormalTok{.}\OperatorTok{@}\NormalTok{y.values}
+
+
+\NormalTok{Default <-}\StringTok{ }\NormalTok{Default }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{default_pred =} \KeywordTok{ifelse}\NormalTok{(preds}\OperatorTok{<}\FloatTok{0.5}\NormalTok{,}\StringTok{"No"}\NormalTok{,}\StringTok{"Yes"}\NormalTok{))}
+
+\CommentTok{#Confusion Matrix}
+\KeywordTok{table}\NormalTok{(Default}\OperatorTok{$}\NormalTok{default,Default}\OperatorTok{$}\NormalTok{default_pred)}
+\end{Highlighting}
+\end{Shaded}
+
+\textit{Answer: } From the graph presented above, it looks like the
+model discriminates well between customers who default and those who do
+not. After computing for the Area Under the Curve (AUC), a value of
+0.9496 is obtained which indicates that the model is a good classifying
+model. From the confusion matrix, there are numerous misclassifications
+from the predicted model. False positives are 40 and false negatives are
+228.
+
+
+\end{document}
