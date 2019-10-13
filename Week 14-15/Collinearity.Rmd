@@ -47,6 +47,7 @@ summary(mod)
 ```
 
 \textit{Answer:}
+For the following model, we can reject the null hypothesis that B1=0 but we cannot reject the null hypothesis that B2=0.
 
 ## Problem 3
 Now fit a least squares regression to predict \color{blue} `y` \color{black} using only \color{blue} `x1` \color{black}. Comment on your results. Can you reject the null hypothesis $H_0: \beta_1 = 0$?
@@ -57,6 +58,7 @@ summary(mod2)
 ```
 
 \textit{Answer:}
+In this model, we can reject the null hypothesis that B1=0.
 
 ## Problem 4
 Now fit a least squares regression to predict \color{blue} `y` \color{black} using only \color{blue} `x2` \color{black}. Comment on your results. Can you reject the null hypothesis $H_0: \beta_1 = 0$?
@@ -66,11 +68,13 @@ mod3 <- lm(y~x2, data=df)
 summary(mod3)
 ```
 
-\textit{Answer:}. 
+\textit{Answer:}
+In this model, we can reject the null hypothesis that B2=0.
 
 ## Problem 5
 Do the results obtained in Problem 2 and 4 contradict each other? Explain your answer.
 \textit{Answer: }
+The results in Problem 2 and 4 show what happens when the predictor variables are highly correlated with each other. Since x1 and x2 have high correlation, then using them both in a model to predict y results in x2 having no statistically significant relationship with y. However, using them separately in two models results in each having significant linear relationship with y.
 
 
 
