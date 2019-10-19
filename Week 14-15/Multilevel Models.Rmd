@@ -46,36 +46,167 @@ library(merTools)
 music <- read.csv("musicdata.csv")
 music <- music %>% mutate(solo = ifelse(perform_type == "Solo", 1, 0))
 
-DELETE! https://bookdown.org/roback/bookdown-bysh/ch-multilevelintro.html
 ```
 
 ## Problem 1
 In this dataset the group is the musician and the unit is the performance. Classify the predictors into unit-level and group-level.
 
+The unit-level predictors (observed per performance) are:
 
+- diary
+- perform_type
+- memory 
+- audience
+- pa
+- na
+  
+The group-level predictors are:
+
+- gender
+- mpqsr
+- mpqab
+- mpqpem
+- mpqnem
+- mpqcon
+- instrument
+- years_study
+- previous
+  
 ## Problem 2
 What is the max, min, and median number of diary entries for the musicians? 
 
+```{r}
+tibble("min"= min(music$diary),
+       "max"=max(music$diary),
+       "median"=median(music$diary)
+)
+```
 
 
 ## Problem 3
 
  Write the equations for the model that predicts positive affect, `pa`, with a random intercept term and no predictors. Clearly define all of the terms. Fit this model. What is the estimated mean positive affect across all diary entries and musicians? Use this model to calculate the intraclass correlation coefficient. Interpret this value. 
  
+The multilevel model for the varying intercept model is
+
+$$ y_i = \alpha_{j[i]} + \epsilon_i$$
+$$ \alpha_j \sim N(\mu_a, \sigma^2_a)$$
+$$ \epsilon_i \sim N(0, \sigma^2_y)$$
+where 
+
+- $y_i$ is the positive affect measurement for performance $i$
+- $\alpha_{j[i]}$ is the random effect of individual $j$, this is also the mean positive affect in all performaces of individual $j$
+- $\mu_a$ is the mean of the positive affect measurement of all performaces across all individuals
+- $\sigma_\alpha^2$ is the variance between individuals
+- $\sigma_y^2$ is the variance within performances of an individual
+```{r}
+int_only <- lmer(pa~1 + (1|id), data=music)
+summary(int_only)
+
+#getting the intraclass correlation coefficient
+sigmas <- arm::sigma.hat(int_only)$sigma
+icc <- sigmas$data/(sigmas$data + sigmas$id)
+icc
+```
+The estimated mean positive affect across all diary entries and musicians is 32.5622.
+
+Having an intraclass correlation coefficient of 0.57 means that 57% of the total variability in positive affect in performances are attributable to differences among performers.
+ 
 ## Problem 4
 Building on the model from the previous problem, include audience type (`audience`), performing solo (`solo`) and (`years_study`) in your model as fixed effects. Write the equation for this model. Fit the model and interpret the estimates. 
+
+The multilevel model for varying intercept but fixed predictors is:
+
+\begin{align*} 
+y_i = \alpha_{j[i]} + \beta_1(audience_Juried)_i + \beta_2(audience\_Public)_i \\+ \beta_3(audience\_Student)_i + \beta_4(solo)_i + \beta_5(years\_study)_i + \epsilon_i 
+\end{align*} 
+$$ \alpha_j \sim N(\mu_a, \sigma^2_a)$$ 
+$$ \epsilon_i \sim N(0, \sigma^2_y)$$ 
+
+where
+
+- $y_i$ is the positive affect measurement for performance $i$
+- $\alpha_{j[i]}$ is the random effect of individual $j$, this is also the mean positive affect in all performaces with an Instructor audience, group performances, and 0 years of study in the instrument for individual $j$
+- $\beta_1$ is the average difference in positive affect measurement for Juried Recitals
+- $\beta_2$ is the average difference in positive affect measurement for Public Performances 
+- $\beta_3$ is the average difference in positive affect measurement for performances with student audience
+- $\beta_4$ is the average difference in positive affect measurement for solo performances and those that are not solo
+- $\beta_5$ is the average difference in positive affect measurement for each unit increase in years_study
+- $\mu_a$ is the mean of the positive affect measurement of all performaces across all individuals
+- $\sigma_\alpha^2$ is the variance between individuals
+- $\sigma_y^2$ is the variance within performances of an individual
+```{r}
+mod2 <- lmer(pa~1 + audience + solo + years_study + (1|id), data=music)
+summary(mod2)
+
+```
+The results of the model show that the mean positive affect in all performaces with an Instructor audience is 32.5354. There is a 6.33 increase to this for Juried Recitals, 2.3 increase for public performances, 0.13 increase for student audiences. The positive affect is lower by 0.64 for solo performances. Suprisingly, the positive affect decreases by 0.18 for a year increase in the study of an instrument.
 
 
 ## Problem 5
 Fit the model in the previous problem but now allow the effect of performing solo to vary by musician (random slopes). Write the equation for this model. What are the estimates for the mean effect of solo and the variance of the effect of solo. 
 
+The multilevel model for varying intercept and varying slope for the variable "solo" is:
 
+\begin{align*} 
+y_i = \alpha_{j[i]} + \beta_1(audience_Juried)_i + \beta_2(audience\_Public)_i + \\ \beta_3(audience\_Student)_i + \beta_{4[j]i}(solo)_i + \beta_5(years\_study)_i + \epsilon_i
+\end
+{align*} 
+$$ \alpha_j \sim N(\mu_a, \sigma^2_a)$$ 
+$$ \epsilon_i \sim N(0, \sigma^2_y)$$
+$$ \beta_i \sim N(\mu_{\beta_4}, \sigma_{\beta_4}^2)$$
 
+where 
+
+- $y_i$ is the positive affect measurement for performance $i$
+- $\alpha_{j[i]}$ is the random effect of individual $j$, this is also the mean positive affect in all performaces with an Instructor audience, group performances, and 0 years of study in the instrument for performer $j$
+- $\beta_1$ is the average difference in positive affect measurement for Juried Recitals
+- $\beta_2$ is the average difference in positive affect measurement for Public Performances 
+- $\beta_3$ is the average difference in positive affect measurement for performances with student audience
+- $\beta_{4[j]i}$ is another random effect of individual $j$. This is the average difference in positive affect measurement for solo performances and those that are not solo of individual $j$.
+- $\beta_5$ is the average difference in positive affect measurement for each unit increase in years_study
+- $\mu_a$ is the mean of the positive affect measurement of all performaces across all individuals
+- $\mu_{\beta_4}$ is the mean of the difference between the positive affect measurement of solo performances and those that are not across all individuals
+- $\sigma_\alpha^2$ and $\sigma_{\beta_4}^2$ is the variance between individuals
+- $\sigma_y^2$ is the variance within performances of an individual
+
+```{r}
+mod3 <- lmer(pa~1 + audience + solo + years_study + (1 + solo|id), data=music)
+summary(mod3)
+```
 ## Problem 6
 
 Compare the models from the two previous problems using a likelihood ratio test. Which model is better?
 
+```{r}
+anova(mod3,mod2)
+```
+Using the likelihood ratio test, the model with the additional varying slope for the "solo" variable is better.
 
 ## Problem 7
 Using the model chosen above, predict the happiness score for the first observation using just the fixed effects by (1) creating the model matrix, (2) obtaining the fixed effect coefficients using `fixedf` (3) multiplying them by the first row of the model matrix you created. Compare this result to the output of the `predict` fuction. Now create a new vector that is the same as the first row of music but with an id = 100. Make a prediction for this observation. Use `predictInterval` in the `merTools` package to get intervals for your two predictions. 
 
+```{r}
+fixed <- as.matrix(fixef(mod3))
+
+music$Juried <- ifelse(music$audience=="Juried Recital",1,0)
+music$Public <- ifelse(music$audience=="Public Performance",1,0)
+music$Student <- ifelse(music$audience=="Student(s)",1,0)
+
+model_matrix <- subset(music, select=c(Juried, Public, Student, solo, years_study))
+model_matrix$constant <- rep(1,nrow(music))
+model_matrix <- as.matrix(model_matrix)
+model_matrix <- model_matrix[,c("constant","Juried", "Public", "Student", "solo", "years_study")]
+music$pred_fixedef <- model_matrix%*%fixed
+music[,c("fit","upr","lwr")]<-predictInterval(mod3, newdata = music)
+
+head(music)
+
+new_data <- head(music,1)
+new_data$id <- 100
+
+pred_new <- predictInterval(mod3, newdata = new_data)
+
+tibble(pred_orig_id=music$fit[1],pred_new_id = pred_new$fit)
+```
+The prediction value for the first row with changed id number is just the same value for predicting using the fixed effects coefficients. 

@@ -23,6 +23,7 @@ library(ISLR)
 library(leaps)
 library(glmnet)
 library(pls)
+library(dplyr)
 ```
 ### Null Model
 ```{r}
@@ -100,8 +101,10 @@ for (i in 1:5){
   lst_sqrs_mod <- lm(Apps~., data= train)
   regfit.full = regsubsets(Apps~., train, nvmax= 17)
   regfit.forward = regsubsets(Apps~., train, nvmax= 17, method="forward")
-  ridge.mod = cv.glmnet(model.matrix(Apps~., train)[,-1], train$Apps, alpha=0, lambda=grid, thresh=1e-12)
-  lasso.mod = cv.glmnet(model.matrix(Apps~., train)[,-1], train$Apps, alpha=1, lambda=grid, thresh=1e-12)
+  ridge.mod = cv.glmnet(model.matrix(Apps~., train)[,-1], train$Apps, 
+                        alpha=0, lambda=grid, thresh=1e-12)
+  lasso.mod = cv.glmnet(model.matrix(Apps~., train)[,-1], train$Apps, 
+                        alpha=1, lambda=grid, thresh=1e-12)
   PCR.mod <- pcr(Apps ~ ., data=train, scale=TRUE , validation ="CV")
   
   #Predict and compute RMSE using test data
@@ -128,7 +131,8 @@ for (i in 1:5){
   
 }
 #Lambdas
-tibble(ridge=lambda.ridge, lasso=lambda.lasso)
+tibble(lambda = c("lambda1","lambda2","lambda3","lambda4","lambda5"), 
+       ridge=lambda.ridge, lasso=lambda.lasso)
 
 #PCR components
 tibble("PCR components"=comp.PCR)
@@ -177,33 +181,38 @@ Simulate some of the features as categorical and some as numeric. Set most of th
 
 ```{r}
 #Simulate dataset: 100 features, 300 observations
-x <- data.frame(replicate(n = 20, 
+x <- data.frame(replicate(n = 30, 
           expr = rnorm(n = 300, mean = 0, sd = 1) ),
           replicate(n = 35, 
           expr = rpois(n = 300, lambda = 3) ),
           replicate(n = 35, 
-          expr = runif(n = 300, min = 0, max=35) ),
-          replicate(n = 10, 
-          expr = rbinom(n = 300, size=1, prob = 0.4) ))
+          expr = runif(n = 300, min = 0, max=35) )
+        )
 x <- data.matrix(x)
 b <- matrix(0,nrow=100,ncol=1)
 b[sample(seq(100),20,replace=FALSE),1] <-rnorm(20)
 p <- exp(x%*%b)/(1+exp(x%*%b))
-y <- matrix(NA,nrow=100,ncol=1)
-for (i in 1:100){
+y <- rep(NA,nrow=100,ncol=1)
+for (i in 1:300){
   y[i]<-rbinom(1,n=1,prob=p[i])
 }
 train = sample(c(TRUE,FALSE), 300, prob=c(0.8,0.2), replace=TRUE)
 
 grid = 10^seq(10, -2, length = 100)
 
-ridge.mod = cv.glmnet(x[train,], y[train,], alpha=0, lambda=grid, thresh=1e-12,family="binomial")
-lasso.mod = cv.glmnet(x[train,], y[train,], alpha=1, lambda=grid, thresh=1e-12)
+ridge.mod = cv.glmnet(x[train,], y[train], alpha=0, lambda=grid, 
+                      thresh=1e-12,family="binomial")
+lasso.mod = cv.glmnet(x[train,], y[train], alpha=1, lambda=grid, 
+                      thresh=1e-12, family="binomial")
 
 ridge.pred = predict(ridge.mod, s=ridge.mod$lambda.min, newx = x[!train,])
 lasso.pred = predict(lasso.mod, s=lasso.mod$lambda.min, newx = x[!train,])
 
 error_null_ridge <- sqrt(mean((y[!train] - ridge.pred)^2))
 error_null_lasso <- sqrt(mean((y[!train] - lasso.pred)^2))
+
+print(error_null_ridge)
+print(error_null_lasso)
 ```
 
+Ridge has a lower test MSE. 

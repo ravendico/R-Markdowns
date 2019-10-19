@@ -34,7 +34,7 @@ What is the correlation between \color{blue} `x1` \color{black} and \color{blue}
 ```{r}
 cor(df$x1,df$x2)
 vif(lm(y~., data=df))
-kappa(lm(y~., data=df))
+kappa(df[,-1])
 ```
 
 
@@ -73,8 +73,10 @@ In this model, we can reject the null hypothesis that B2=0.
 
 ## Problem 5
 Do the results obtained in Problem 2 and 4 contradict each other? Explain your answer.
+
 \textit{Answer: }
-The results in Problem 2 and 4 show what happens when the predictor variables are highly correlated with each other. Since x1 and x2 have high correlation, then using them both in a model to predict y results in x2 having no statistically significant relationship with y. However, using them separately in two models results in each having significant linear relationship with y.
+
+The results in Problem 2 and 4 show what happens when the predictor variables are highly correlated with each other. The results contradict each other. Since x1 and x2 have high correlation, then using them both in a model to predict y results in x2 having no statistically significant relationship with y. However, using them separately in two models results in each having significant linear relationship with y.
 
 
 
