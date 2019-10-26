@@ -578,12 +578,24 @@ fit = lm(teengamb$gamble ~ teengamb$sex + teengamb$status +teengamb$income + tee
 summary(fit)
 ```
 # Diagnostics
+SAT
+```{r}
+data(swiss); par(mfrow = c(2, 2))
+fit <- lm(total ~ expend + salary+ratio , data = SAT); plot(fit)
+```
 
 Swiss data
-```{r, fig.height = 5, fig.width = 5}
+```{r, fig.height = 10, fig.width = 10}
 data(swiss); par(mfrow = c(2, 2))
 fit <- lm(Fertility ~ . , data = swiss); plot(fit)
 ```
+Airquality
+```{r}
+data("airquality"); par(mfrow = c(2, 2))
+fit <- lm(Ozone ~ . , data = airquality); plot(fit)
+```
+
+
 ## Influence measures
 * Do `?influence.measures` to see the full suite of influence measures in stats. The measures include
   * `rstandard` - standardized residuals, residuals divided by their standard deviations)
@@ -608,6 +620,12 @@ fit <- lm(Fertility ~ . , data = swiss); plot(fit)
 * Residual QQ plots investigate normality of the errors.
 * Leverage measures (hat values) can be useful for diagnosing data entry errors.
 * Influence measures get to the bottom line, 'how does deleting or including this point impact a particular aspect of the model'.
+```{r}
+```{r}
+
+```
+
+```
 
 ## Case 1
 ```{r}
